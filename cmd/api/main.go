@@ -5,7 +5,6 @@ import (
 	"SangXanh/pkg/config"
 	"SangXanh/pkg/connection"
 	"SangXanh/pkg/log"
-	"SangXanh/pkg/repository"
 	"SangXanh/pkg/service"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,7 +15,6 @@ func main() {
 	di := do.New()
 	config.Inject(di)
 	connection.Inject(di)
-	repository.Inject(di)
 	service.Inject(di)
 
 	serverConf := do.MustInvoke[config.Server](di)
