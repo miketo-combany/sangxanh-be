@@ -51,39 +51,48 @@ type PublicUsersUpdate struct {
 }
 
 type PublicCategoriesSelect struct {
-  CreatedAt     string         `json:"created_at"`
-  DeletedAt     sql.NullString `json:"deleted_at"`
-  Id            string         `json:"id"`
-  Metadata      interface{}    `json:"metadata"`
-  Name          string         `json:"name"`
-  Status        sql.NullBool   `json:"status"`
-  SubCategories interface{}    `json:"sub_categories"`
-  Thumbnail     sql.NullString `json:"thumbnail"`
-  UpdatedAt     sql.NullString `json:"updated_at"`
+  CreatedAt   string         `json:"created_at"`
+  CreatedBy   sql.NullString `json:"created_by"`
+  DeletedAt   sql.NullString `json:"deleted_at"`
+  Description sql.NullString `json:"description"`
+  Id          string         `json:"id"`
+  Level       sql.NullInt32  `json:"level"`
+  Metadata    interface{}    `json:"metadata"`
+  Name        string         `json:"name"`
+  ParentId    sql.NullString `json:"parent_id"`
+  Status      sql.NullBool   `json:"status"`
+  Thumbnail   sql.NullString `json:"thumbnail"`
+  UpdatedAt   sql.NullString `json:"updated_at"`
 }
 
 type PublicCategoriesInsert struct {
-  CreatedAt     sql.NullString `json:"created_at"`
-  DeletedAt     sql.NullString `json:"deleted_at"`
-  Id            sql.NullString `json:"id"`
-  Metadata      interface{}    `json:"metadata"`
-  Name          string         `json:"name"`
-  Status        sql.NullBool   `json:"status"`
-  SubCategories interface{}    `json:"sub_categories"`
-  Thumbnail     sql.NullString `json:"thumbnail"`
-  UpdatedAt     sql.NullString `json:"updated_at"`
+  CreatedAt   sql.NullString `json:"created_at"`
+  CreatedBy   sql.NullString `json:"created_by"`
+  DeletedAt   sql.NullString `json:"deleted_at"`
+  Description sql.NullString `json:"description"`
+  Id          sql.NullString `json:"id"`
+  Level       sql.NullInt32  `json:"level"`
+  Metadata    interface{}    `json:"metadata"`
+  Name        string         `json:"name"`
+  ParentId    sql.NullString `json:"parent_id"`
+  Status      sql.NullBool   `json:"status"`
+  Thumbnail   sql.NullString `json:"thumbnail"`
+  UpdatedAt   sql.NullString `json:"updated_at"`
 }
 
 type PublicCategoriesUpdate struct {
-  CreatedAt     sql.NullString `json:"created_at"`
-  DeletedAt     sql.NullString `json:"deleted_at"`
-  Id            sql.NullString `json:"id"`
-  Metadata      interface{}    `json:"metadata"`
-  Name          sql.NullString `json:"name"`
-  Status        sql.NullBool   `json:"status"`
-  SubCategories interface{}    `json:"sub_categories"`
-  Thumbnail     sql.NullString `json:"thumbnail"`
-  UpdatedAt     sql.NullString `json:"updated_at"`
+  CreatedAt   sql.NullString `json:"created_at"`
+  CreatedBy   sql.NullString `json:"created_by"`
+  DeletedAt   sql.NullString `json:"deleted_at"`
+  Description sql.NullString `json:"description"`
+  Id          sql.NullString `json:"id"`
+  Level       sql.NullInt32  `json:"level"`
+  Metadata    interface{}    `json:"metadata"`
+  Name        sql.NullString `json:"name"`
+  ParentId    sql.NullString `json:"parent_id"`
+  Status      sql.NullBool   `json:"status"`
+  Thumbnail   sql.NullString `json:"thumbnail"`
+  UpdatedAt   sql.NullString `json:"updated_at"`
 }
 
 type PublicProductsSelect struct {
@@ -137,6 +146,7 @@ type PublicProductsUpdate struct {
 type PublicProductVariantsSelect struct {
   CreatedAt string         `json:"created_at"`
   DeletedAt sql.NullString `json:"deleted_at"`
+  Detail    interface{}    `json:"detail"`
   Id        string         `json:"id"`
   Metadata  []interface{}  `json:"metadata"`
   Name      string         `json:"name"`
@@ -147,6 +157,7 @@ type PublicProductVariantsSelect struct {
 type PublicProductVariantsInsert struct {
   CreatedAt sql.NullString `json:"created_at"`
   DeletedAt sql.NullString `json:"deleted_at"`
+  Detail    interface{}    `json:"detail"`
   Id        sql.NullString `json:"id"`
   Metadata  []interface{}  `json:"metadata"`
   Name      string         `json:"name"`
@@ -157,6 +168,7 @@ type PublicProductVariantsInsert struct {
 type PublicProductVariantsUpdate struct {
   CreatedAt sql.NullString `json:"created_at"`
   DeletedAt sql.NullString `json:"deleted_at"`
+  Detail    interface{}    `json:"detail"`
   Id        sql.NullString `json:"id"`
   Metadata  []interface{}  `json:"metadata"`
   Name      sql.NullString `json:"name"`
@@ -164,37 +176,43 @@ type PublicProductVariantsUpdate struct {
   UpdatedAt sql.NullString `json:"updated_at"`
 }
 
-type PublicProductVariantDetailsSelect struct {
-  CreatedAt        sql.NullString  `json:"created_at"`
-  DeletedAt        sql.NullString  `json:"deleted_at"`
-  ExtraPrice       sql.NullFloat64 `json:"extra_price"`
-  Id               string          `json:"id"`
-  Metadata         []interface{}   `json:"metadata"`
-  Name             sql.NullString  `json:"name"`
-  ProductVariantId sql.NullString  `json:"product_variant_id"`
-  UpdatedAt        sql.NullString  `json:"updated_at"`
+type PublicProductOptionsSelect struct {
+  CreatedAt  sql.NullString  `json:"created_at"`
+  DeletedAt  sql.NullString  `json:"deleted_at"`
+  Detail     interface{}     `json:"detail"`
+  ExtraPrice sql.NullFloat64 `json:"extra_price"`
+  Id         string          `json:"id"`
+  Image      sql.NullString  `json:"image"`
+  Metadata   []interface{}   `json:"metadata"`
+  Name       sql.NullString  `json:"name"`
+  ProductId  sql.NullString  `json:"product_id"`
+  UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 
-type PublicProductVariantDetailsInsert struct {
-  CreatedAt        sql.NullString  `json:"created_at"`
-  DeletedAt        sql.NullString  `json:"deleted_at"`
-  ExtraPrice       sql.NullFloat64 `json:"extra_price"`
-  Id               sql.NullString  `json:"id"`
-  Metadata         []interface{}   `json:"metadata"`
-  Name             sql.NullString  `json:"name"`
-  ProductVariantId sql.NullString  `json:"product_variant_id"`
-  UpdatedAt        sql.NullString  `json:"updated_at"`
+type PublicProductOptionsInsert struct {
+  CreatedAt  sql.NullString  `json:"created_at"`
+  DeletedAt  sql.NullString  `json:"deleted_at"`
+  Detail     interface{}     `json:"detail"`
+  ExtraPrice sql.NullFloat64 `json:"extra_price"`
+  Id         sql.NullString  `json:"id"`
+  Image      sql.NullString  `json:"image"`
+  Metadata   []interface{}   `json:"metadata"`
+  Name       sql.NullString  `json:"name"`
+  ProductId  sql.NullString  `json:"product_id"`
+  UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 
-type PublicProductVariantDetailsUpdate struct {
-  CreatedAt        sql.NullString  `json:"created_at"`
-  DeletedAt        sql.NullString  `json:"deleted_at"`
-  ExtraPrice       sql.NullFloat64 `json:"extra_price"`
-  Id               sql.NullString  `json:"id"`
-  Metadata         []interface{}   `json:"metadata"`
-  Name             sql.NullString  `json:"name"`
-  ProductVariantId sql.NullString  `json:"product_variant_id"`
-  UpdatedAt        sql.NullString  `json:"updated_at"`
+type PublicProductOptionsUpdate struct {
+  CreatedAt  sql.NullString  `json:"created_at"`
+  DeletedAt  sql.NullString  `json:"deleted_at"`
+  Detail     interface{}     `json:"detail"`
+  ExtraPrice sql.NullFloat64 `json:"extra_price"`
+  Id         sql.NullString  `json:"id"`
+  Image      sql.NullString  `json:"image"`
+  Metadata   []interface{}   `json:"metadata"`
+  Name       sql.NullString  `json:"name"`
+  ProductId  sql.NullString  `json:"product_id"`
+  UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 
 type PublicOrdersSelect struct {

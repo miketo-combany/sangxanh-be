@@ -8,8 +8,8 @@ import (
 
 type User struct {
 	ID         primitive.ObjectID `json:"id"`
-	CreatedAt  int64              `json:"created_at"`
-	UpdatedAt  int64              `json:"updated_at"`
+	CreatedAt  int64              `json:"created_at,omitempty"`
+	UpdatedAt  int64              `json:"updated_at,omitempty"`
 	Email      string             `json:"email"`
 	Name       string             `json:"name"`
 	GivenName  string             `json:"given_name"`

@@ -5,6 +5,8 @@ import (
 	"SangXanh/pkg/dto"
 	"SangXanh/pkg/model"
 	"context"
+	"fmt"
+	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
 	"time"
 )
@@ -15,10 +17,17 @@ type UserService interface {
 }
 
 type userService struct {
+	db *supabase.Client
 }
 
+// NewUserService initializes UserService with Supabase database connection
 func NewUserService(di do.Injector) (UserService, error) {
-	return &userService{}, nil
+	db, err := do.Invoke[*supabase.Client](di)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize UserService: %w", err)
+	}
+
+	return &userService{db: db}, nil
 }
 
 func (u *userService) CreateUser(ctx context.Context, req dto.CreateUser) (api.Response, error) {

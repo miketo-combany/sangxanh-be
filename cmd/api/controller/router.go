@@ -10,6 +10,7 @@ func RegisterAPI(di do.Injector, e *echo.Group) error {
 	type controller func(di do.Injector) (api.Controller, error)
 	controllers := []controller{
 		NewUserController,
+		NewCategoryController,
 	}
 
 	for _, c := range controllers {
