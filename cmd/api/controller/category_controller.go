@@ -18,24 +18,32 @@ func NewCategoryController(di do.Injector) (api.Controller, error) {
 	}, nil
 }
 
-func (u *categoryController) Register(g *echo.Group) {
+func (c *categoryController) Register(g *echo.Group) {
 	g = g.Group("/category")
-	g.GET("", u.List)
-	g.POST("/create", u.Create)
-	g.PUT("/update", u.Update)
+	g.GET("", c.List)
+	g.POST("/create", c.Create)
+	g.PUT("/update", c.Update)
+	g.DELETE("/delete", c.Delete)
 }
 
-func (u *categoryController) List(e echo.Context) error {
+func (c *categoryController) List(e echo.Context) error {
 	name := e.QueryParam("name") // Get "name" parameter from URL
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return u.categoryService.ListCategories(ctx, name)
+		return c.categoryService.ListCategories(ctx, name)
 	})
 }
 
-func (u *categoryController) Create(e echo.Context) error {
-	return api.Execute(e, u.categoryService.CreateCategory)
+func (c *categoryController) Create(e echo.Context) error {
+	return api.Execute(e, c.categoryService.CreateCategory)
 }
 
-func (u *categoryController) Update(e echo.Context) error {
-	return api.Execute(e, u.categoryService.UpdateCategory)
+func (c *categoryController) Update(e echo.Context) error {
+	return api.Execute(e, c.categoryService.UpdateCategory)
+}
+
+func (c *categoryController) Delete(e echo.Context) error {
+	id := e.QueryParam("categoryId") // Get "id" parameter from URL
+	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+		return c.categoryService.DeleteCategory(ctx, id)
+	})
 }

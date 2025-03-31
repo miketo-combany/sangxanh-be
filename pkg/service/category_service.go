@@ -19,6 +19,7 @@ type CategoryService interface {
 	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
 	ListCategories(ctx context.Context, name string) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
+	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
 }
 
 type categoryService struct {
@@ -83,8 +84,8 @@ func (u *categoryService) ListCategories(ctx context.Context, name string) (api.
 	var categories []dto.Category
 	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
 	if name != "" {
-		query = query.Ilike("name", name)
-		log.Info(name)
+		log.Info("searching for categories by name: ", name)
+		query = query.Like("name", "%"+name+"%")
 	}
 	err := query.Execute(&categories)
 	if err != nil {
@@ -146,7 +147,6 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		log.Errorf("Category with ID %s not found: %v", req.Id, err)
 		return nil, fmt.Errorf("category not found")
 	}
-	log.Info("================================")
 
 	// Prepare updated fields
 	updateData := map[string]interface{}{
