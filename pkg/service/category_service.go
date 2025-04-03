@@ -5,7 +5,6 @@ import (
 	"SangXanh/pkg/dto"
 	"SangXanh/pkg/enum"
 	"SangXanh/pkg/log"
-	"SangXanh/pkg/model"
 	"context"
 	"fmt"
 	"github.com/google/uuid"
@@ -15,7 +14,6 @@ import (
 )
 
 type CategoryService interface {
-	ListUser(ctx context.Context, req dto.ListUser) (api.Response, error)
 	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
 	ListCategories(ctx context.Context, name string) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
@@ -71,12 +69,6 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 	log.Info("category created", category)
 	categoryResponse := dto.GetResponse(&category[0], nil)
 	return api.Success(categoryResponse), nil
-}
-
-func (u *categoryService) ListUser(ctx context.Context, req dto.ListUser) (api.Response, error) {
-	p := &req.Pagination
-	var users []*model.User
-	return api.SuccessPagination(users, p), nil
 }
 
 func (u *categoryService) ListCategories(ctx context.Context, name string) (api.Response, error) {
@@ -205,8 +197,11 @@ func (u *categoryService) DeleteCategory(ctx context.Context, categoryId string)
 		return nil, fmt.Errorf("category has child categories and cannot be deleted")
 	}
 
+	updateData := map[string]interface{}{
+		"deleted_at": time.Now(),
+	}
 	// Delete the category
-	err = u.db.DB.From("categories").Delete().Eq("id", categoryId).Execute(&category)
+	err = u.db.DB.From("categories").Update(updateData).Eq("id", categoryId).Execute(&category)
 	if err != nil {
 		log.Errorf("Failed to delete category %s: %v", categoryId, err)
 		return nil, fmt.Errorf("failed to delete category")

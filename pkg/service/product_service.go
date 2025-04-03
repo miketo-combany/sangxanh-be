@@ -3,200 +3,105 @@ package service
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
-	"SangXanh/pkg/enum"
-	"SangXanh/pkg/log"
-	"SangXanh/pkg/model"
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
-	"github.com/samber/do/v2"
+	"strconv"
 	"time"
 )
 
 type ProductService interface {
-	ListUser(ctx context.Context, req dto.ListUser) (api.Response, error)
-	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
-	ListCategories(ctx context.Context, name string) (api.Response, error)
-	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
-	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
+	ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error)
+	CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error)
+	UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error)
+	DeleteProduct(ctx context.Context, id string) (api.Response, error)
 }
 
 type productService struct {
 	db *supabase.Client
 }
 
-func NewProductService(di do.Injector) (ProductService, error) {
-	db, err := do.Invoke[*supabase.Client](di)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize UserService: %w", err)
-	}
-
-	return &productService{db: db}, nil
+func NewProductService(db *supabase.Client) ProductService {
+	return &productService{db: db}
 }
 
-func (u *productService) CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error) {
-	createCategory := dto.CategoryCreate{
-		Name:        req.Name,
-		Metadata:    req.Metadata,
-		Status:      req.Status,
-		Thumbnail:   req.Thumbnail,
-		Description: req.Description,
+func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
+	var products []dto.ProductList
+	query := s.db.DB.From("products").Select("products.*, categories.name as category_name").
+		Wfts("categories", "categories.id = products.category_id").
+		IsNull("products.deleted_at")
+
+	if filter.CategoryId != "" {
+		query = query.Eq("category_id", filter.CategoryId)
+	}
+	if filter.IsDiscount {
+		query = query.Not().IsNull("discount")
+	}
+	if filter.GreaterThan > 0 {
+		query = query.Gt("price", strconv.FormatFloat(filter.GreaterThan, 'f', -1, 32))
+	}
+	if filter.SmallerThan > 0 {
+		query = query.Lt("price", strconv.FormatFloat(filter.SmallerThan, 'f', -1, 32))
 	}
 
-	var parentCategory dto.Category
-	if req.ParentId != uuid.Nil.String() && req.ParentId != "" {
-		err := u.db.DB.From("categories").
-			Select("*").
-			Eq("id", req.ParentId).
-			Execute(&parentCategory)
-
-		if err != nil {
-			log.Errorf("Parent category with ID %s does not exist: %v", req.ParentId, err)
-			return nil, err
-		}
-
-		createCategory.ParentId = req.ParentId
-		createCategory.Level = parentCategory.Level + 1 // Set child category level
-	} else {
-		createCategory.ParentId = ""
-	}
-
-	var category []dto.Category
-	err := u.db.DB.From("categories").Insert(createCategory).Execute(&category)
+	err := query.Execute(&products)
 	if err != nil {
-		log.Errorf("failed to insert category: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch products: %v", err)
 	}
-	log.Info("category created", category)
-	categoryResponse := dto.GetResponse(&category[0], nil)
-	return api.Success(categoryResponse), nil
+	return api.Success(products), nil
 }
 
-func (u *productService) ListUser(ctx context.Context, req dto.ListUser) (api.Response, error) {
-	p := &req.Pagination
-	var users []*model.User
-	return api.SuccessPagination(users, p), nil
+func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error) {
+	newProduct := dto.ProductCreated{
+		Name:         req.Name,
+		Price:        req.Price,
+		Content:      req.Content,
+		ImageDetail:  req.ImageDetail,
+		Thumbnail:    req.Thumbnail,
+		CategoryId:   req.CategoryId,
+		Discount:     req.Discount,
+		DiscountType: req.DiscountType,
+		Metadata:     req.Metadata,
+	}
+
+	var product []dto.Product
+	err := s.db.DB.From("products").Insert(newProduct).Execute(&product)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create product: %v", err)
+	}
+
+	return api.Success(newProduct), nil
 }
 
-func (u *productService) ListCategories(ctx context.Context, name string) (api.Response, error) {
-	// Step 1: Fetch all categories from Supabase
-	var categories []dto.Category
-	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
-	if name != "" {
-		log.Info("searching for categories by name: ", name)
-		query = query.Like("name", "%"+name+"%")
-	}
-	err := query.Execute(&categories)
-	if err != nil {
-		log.Errorf("failed to fetch categories: %v", err)
-		return nil, err
-	}
-
-	// Step 2: Create a map to organize categories by ParentId
-	categoryMap := make(map[string]dto.Category)
-	categoryResponseMap := make(map[string]dto.CategoryListResponse)
-	var topLevelCategories []dto.Category
-
-	for _, category := range categories {
-		if category.ParentId == uuid.Nil.String() || category.ParentId == "" {
-			topLevelCategories = append(topLevelCategories, category) // Root categories
-		}
-		categoryMap[category.Id] = category // Group by ParentId
-		categoryResponseMap[category.Id] = buildCategoryResponse(category)
-	}
-
-	// Step 3: Convert categories into the response format
-	var categoryResponses []dto.CategoryListResponse
-
-	for _, category := range categoryResponseMap {
-		if category.ParentId != uuid.Nil.String() && category.ParentId != "" {
-			parentCategory := categoryResponseMap[category.ParentId]
-			parentCategory.Categories = append(parentCategory.Categories, category)
-			categoryResponseMap[category.ParentId] = parentCategory
-		}
-	}
-
-	for _, category := range topLevelCategories {
-		categoryResponses = append(categoryResponses, categoryResponseMap[category.Id])
-	}
-
-	return api.Success(categoryResponses), nil
-}
-
-func (u *productService) UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error) {
-	// Check if the category exists
-	var existingCategory []dto.Category
-	err := u.db.DB.From("categories").Select("*").Eq("id", req.Id).Execute(&existingCategory)
-	if err != nil {
-		log.Errorf("Category with ID %s not found: %v", req.Id, err)
-		return nil, fmt.Errorf("category not found")
-	}
-
-	// Prepare updated fields
+func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error) {
 	updateData := map[string]interface{}{
-		"name":        req.Name,
-		"thumbnail":   req.Thumbnail,
-		"status":      req.Status,
-		"metadata":    req.Metadata,
-		"description": req.Description,
-		"updated_at":  time.Now(),
+		"name":          req.Name,
+		"price":         req.Price,
+		"content":       req.Content,
+		"image_detail":  req.ImageDetail,
+		"thumbnail":     req.Thumbnail,
+		"category_id":   req.CategoryId,
+		"discount":      req.Discount,
+		"discount_type": req.DiscountType,
+		"metadata":      req.Metadata,
 	}
 
-	// Perform the update
-	var updateCategory []dto.Category
-	err = u.db.DB.From("categories").Update(updateData).Eq("id", req.Id).Execute(&updateCategory)
+	err := s.db.DB.From("products").Update(updateData).Eq("id", req.Id).Execute()
 	if err != nil {
-		log.Errorf("Failed to update category %s: %v", req.Id, err)
-		return nil, fmt.Errorf("failed to update category")
+		return nil, fmt.Errorf("failed to update product: %v", err)
 	}
-	updatedCategory := updateCategory[0]
-
-	// Build response
-	categoryResponse := dto.CategoryResponse{
-		Id:          updatedCategory.Id,
-		Name:        updatedCategory.Name,
-		Thumbnail:   updatedCategory.Thumbnail,
-		Level:       updatedCategory.Level,
-		Description: updatedCategory.Description,
-		Status:      enum.ToStatus(updatedCategory.Status),
-		Metadata:    updatedCategory.Metadata,
-		UpdatedAt:   time.Now(),
-		CreatedAt:   updatedCategory.CreatedAt,
-	}
-
-	return api.Success(categoryResponse), nil
+	return api.Success("Product updated successfully"), nil
 }
 
-func (u *productService) DeleteCategory(ctx context.Context, categoryId string) (api.Response, error) {
-	// Check if the category exists
-	var category []dto.Category
-	err := u.db.DB.From("categories").Select("*").Eq("id", categoryId).Execute(&category)
+func (s *productService) DeleteProduct(ctx context.Context, id string) (api.Response, error) {
+	updateData := map[string]interface{}{
+		"deleted_at": time.Now(),
+	}
+
+	var product []dto.Product
+	err := s.db.DB.From("products").Update(updateData).Eq("id", id).Execute(&product)
 	if err != nil {
-		log.Errorf("Category with ID %s not found: %v", categoryId, err)
-		return nil, fmt.Errorf("category not found")
+		return nil, fmt.Errorf("failed to soft delete product: %v", err)
 	}
-
-	// Check if the category has child categories
-	var childCategories []dto.Category
-	err = u.db.DB.From("categories").Select("id").Eq("parent_id", categoryId).Execute(&childCategories)
-	if err != nil {
-		log.Errorf("Failed to check child categories for %s: %v", categoryId, err)
-		return nil, fmt.Errorf("failed to verify child categories")
-	}
-
-	if len(childCategories) > 0 {
-		log.Errorf("Cannot delete category %s as it has child categories", categoryId)
-		return nil, fmt.Errorf("category has child categories and cannot be deleted")
-	}
-
-	// Delete the category
-	err = u.db.DB.From("categories").Delete().Eq("id", categoryId).Execute(&category)
-	if err != nil {
-		log.Errorf("Failed to delete category %s: %v", categoryId, err)
-		return nil, fmt.Errorf("failed to delete category")
-	}
-
-	log.Infof("Category %s deleted successfully", categoryId)
-	return api.Success("Category deleted successfully"), nil
+	return api.Success("Product deleted successfully"), nil
 }

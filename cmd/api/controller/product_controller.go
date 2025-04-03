@@ -19,7 +19,7 @@ func NewProductController(di do.Injector) (api.Controller, error) {
 }
 
 func (c *productController) Register(g *echo.Group) {
-	g = g.Group("/category")
+	g = g.Group("/product")
 	g.GET("", c.List)
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
