@@ -55,7 +55,7 @@ type ProductResponse struct {
 	Thumbnail    string            `json:"thumbnail"`
 	Discount     float32           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
-	CategoryName string            `json:"category_name"`
+	CategoryId   string            `json:"category_id"`
 }
 
 type ProductList struct {
@@ -64,9 +64,14 @@ type ProductList struct {
 	Price        float64           `json:"price"`
 	Content      string            `json:"content"`
 	Thumbnail    string            `json:"thumbnail"`
-	CategoryName string            `json:"category_name"`
+	Category     CategoryProduct   `json:"categories"`
 	Discount     float64           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
+}
+
+type CategoryProduct struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type ProductFilter struct {

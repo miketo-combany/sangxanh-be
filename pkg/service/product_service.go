@@ -3,9 +3,11 @@ package service
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
+	"SangXanh/pkg/log"
 	"context"
 	"fmt"
 	"github.com/nedpals/supabase-go"
+	"github.com/samber/do/v2"
 	"strconv"
 	"time"
 )
@@ -21,15 +23,20 @@ type productService struct {
 	db *supabase.Client
 }
 
-func NewProductService(db *supabase.Client) ProductService {
-	return &productService{db: db}
+func NewProductService(di do.Injector) (ProductService, error) {
+	db, err := do.Invoke[*supabase.Client](di)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize UserService: %w", err)
+	}
+
+	return &productService{db: db}, nil
 }
 
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
 	var products []dto.ProductList
-	query := s.db.DB.From("products").Select("products.*, categories.name as category_name").
-		Wfts("categories", "categories.id = products.category_id").
-		IsNull("products.deleted_at")
+	query := s.db.DB.From("products").
+		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name)").
+		IsNull("deleted_at")
 
 	if filter.CategoryId != "" {
 		query = query.Eq("category_id", filter.CategoryId)
@@ -48,6 +55,8 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %v", err)
 	}
+	log.Info(len(products))
+
 	return api.Success(products), nil
 }
 
@@ -64,8 +73,9 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		Metadata:     req.Metadata,
 	}
 
+	err := s.validCategory(req.CategoryId)
 	var product []dto.Product
-	err := s.db.DB.From("products").Insert(newProduct).Execute(&product)
+	err = s.db.DB.From("products").Insert(newProduct).Execute(&product)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create product: %v", err)
 	}
@@ -85,8 +95,10 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 		"discount_type": req.DiscountType,
 		"metadata":      req.Metadata,
 	}
+	err := s.validCategory(req.CategoryId)
 
-	err := s.db.DB.From("products").Update(updateData).Eq("id", req.Id).Execute()
+	var product []dto.Product
+	err = s.db.DB.From("products").Update(updateData).Eq("id", req.Id).Execute(product)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update product: %v", err)
 	}
@@ -104,4 +116,17 @@ func (s *productService) DeleteProduct(ctx context.Context, id string) (api.Resp
 		return nil, fmt.Errorf("failed to soft delete product: %v", err)
 	}
 	return api.Success("Product deleted successfully"), nil
+}
+
+func (s *productService) validCategory(id string) error {
+	var category []dto.Category
+	err := s.db.DB.From("categories").Select("id").Eq("id", id).IsNull("deleted_at").Execute(&category)
+	if err != nil {
+		return fmt.Errorf("failed to find category: %v", err)
+	}
+	if len(category) == 0 {
+		return fmt.Errorf("category not found")
+	}
+	return nil
+
 }

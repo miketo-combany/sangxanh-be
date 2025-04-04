@@ -96,51 +96,51 @@ type PublicCategoriesUpdate struct {
 }
 
 type PublicProductsSelect struct {
-  Content       sql.NullString  `json:"content"`
-  CreatedAt     string          `json:"created_at"`
-  DeletedAt     sql.NullString  `json:"deleted_at"`
-  Discount      sql.NullInt64   `json:"discount"`
-  DiscountType  sql.NullString  `json:"discount_type"`
-  Id            string          `json:"id"`
-  ImageDetail   interface{}     `json:"image_detail"`
-  Metadata      []interface{}   `json:"metadata"`
-  Name          string          `json:"name"`
-  Price         sql.NullFloat64 `json:"price"`
-  SubcategoryId sql.NullString  `json:"subcategory_id"`
-  Thumbnail     sql.NullString  `json:"thumbnail"`
-  UpdatedAt     sql.NullString  `json:"updated_at"`
+  CategoryId   sql.NullString  `json:"category_id"`
+  Content      sql.NullString  `json:"content"`
+  CreatedAt    string          `json:"created_at"`
+  DeletedAt    sql.NullString  `json:"deleted_at"`
+  Discount     sql.NullInt64   `json:"discount"`
+  DiscountType sql.NullString  `json:"discount_type"`
+  Id           string          `json:"id"`
+  ImageDetail  interface{}     `json:"image_detail"`
+  Metadata     []interface{}   `json:"metadata"`
+  Name         string          `json:"name"`
+  Price        sql.NullFloat64 `json:"price"`
+  Thumbnail    sql.NullString  `json:"thumbnail"`
+  UpdatedAt    sql.NullString  `json:"updated_at"`
 }
 
 type PublicProductsInsert struct {
-  Content       sql.NullString  `json:"content"`
-  CreatedAt     sql.NullString  `json:"created_at"`
-  DeletedAt     sql.NullString  `json:"deleted_at"`
-  Discount      sql.NullInt64   `json:"discount"`
-  DiscountType  sql.NullString  `json:"discount_type"`
-  Id            sql.NullString  `json:"id"`
-  ImageDetail   interface{}     `json:"image_detail"`
-  Metadata      []interface{}   `json:"metadata"`
-  Name          string          `json:"name"`
-  Price         sql.NullFloat64 `json:"price"`
-  SubcategoryId sql.NullString  `json:"subcategory_id"`
-  Thumbnail     sql.NullString  `json:"thumbnail"`
-  UpdatedAt     sql.NullString  `json:"updated_at"`
+  CategoryId   sql.NullString  `json:"category_id"`
+  Content      sql.NullString  `json:"content"`
+  CreatedAt    sql.NullString  `json:"created_at"`
+  DeletedAt    sql.NullString  `json:"deleted_at"`
+  Discount     sql.NullInt64   `json:"discount"`
+  DiscountType sql.NullString  `json:"discount_type"`
+  Id           sql.NullString  `json:"id"`
+  ImageDetail  interface{}     `json:"image_detail"`
+  Metadata     []interface{}   `json:"metadata"`
+  Name         string          `json:"name"`
+  Price        sql.NullFloat64 `json:"price"`
+  Thumbnail    sql.NullString  `json:"thumbnail"`
+  UpdatedAt    sql.NullString  `json:"updated_at"`
 }
 
 type PublicProductsUpdate struct {
-  Content       sql.NullString  `json:"content"`
-  CreatedAt     sql.NullString  `json:"created_at"`
-  DeletedAt     sql.NullString  `json:"deleted_at"`
-  Discount      sql.NullInt64   `json:"discount"`
-  DiscountType  sql.NullString  `json:"discount_type"`
-  Id            sql.NullString  `json:"id"`
-  ImageDetail   interface{}     `json:"image_detail"`
-  Metadata      []interface{}   `json:"metadata"`
-  Name          sql.NullString  `json:"name"`
-  Price         sql.NullFloat64 `json:"price"`
-  SubcategoryId sql.NullString  `json:"subcategory_id"`
-  Thumbnail     sql.NullString  `json:"thumbnail"`
-  UpdatedAt     sql.NullString  `json:"updated_at"`
+  CategoryId   sql.NullString  `json:"category_id"`
+  Content      sql.NullString  `json:"content"`
+  CreatedAt    sql.NullString  `json:"created_at"`
+  DeletedAt    sql.NullString  `json:"deleted_at"`
+  Discount     sql.NullInt64   `json:"discount"`
+  DiscountType sql.NullString  `json:"discount_type"`
+  Id           sql.NullString  `json:"id"`
+  ImageDetail  interface{}     `json:"image_detail"`
+  Metadata     []interface{}   `json:"metadata"`
+  Name         sql.NullString  `json:"name"`
+  Price        sql.NullFloat64 `json:"price"`
+  Thumbnail    sql.NullString  `json:"thumbnail"`
+  UpdatedAt    sql.NullString  `json:"updated_at"`
 }
 
 type PublicProductVariantsSelect struct {
@@ -186,6 +186,7 @@ type PublicProductOptionsSelect struct {
   Metadata   []interface{}   `json:"metadata"`
   Name       sql.NullString  `json:"name"`
   ProductId  sql.NullString  `json:"product_id"`
+  Quantity   sql.NullInt32   `json:"quantity"`
   UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 
@@ -199,6 +200,7 @@ type PublicProductOptionsInsert struct {
   Metadata   []interface{}   `json:"metadata"`
   Name       sql.NullString  `json:"name"`
   ProductId  sql.NullString  `json:"product_id"`
+  Quantity   sql.NullInt32   `json:"quantity"`
   UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 
@@ -212,6 +214,7 @@ type PublicProductOptionsUpdate struct {
   Metadata   []interface{}   `json:"metadata"`
   Name       sql.NullString  `json:"name"`
   ProductId  sql.NullString  `json:"product_id"`
+  Quantity   sql.NullInt32   `json:"quantity"`
   UpdatedAt  sql.NullString  `json:"updated_at"`
 }
 

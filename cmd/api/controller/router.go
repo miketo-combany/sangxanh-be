@@ -11,6 +11,7 @@ func RegisterAPI(di do.Injector, e *echo.Group) error {
 	controllers := []controller{
 		NewUserController,
 		NewProductController,
+		NewCategoryController,
 	}
 
 	for _, c := range controllers {

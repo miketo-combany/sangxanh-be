@@ -27,23 +27,20 @@ func (c *productController) Register(g *echo.Group) {
 }
 
 func (c *productController) List(e echo.Context) error {
-	name := e.QueryParam("name") // Get "name" parameter from URL
-	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return c.productService.ListCategories(ctx, name)
-	})
+	return api.Execute(e, c.productService.ListProducts)
 }
 
 func (c *productController) Create(e echo.Context) error {
-	return api.Execute(e, c.productService.CreateCategory)
+	return api.Execute(e, c.productService.CreateProduct)
 }
 
 func (c *productController) Update(e echo.Context) error {
-	return api.Execute(e, c.productService.UpdateCategory)
+	return api.Execute(e, c.productService.UpdateProduct)
 }
 
 func (c *productController) Delete(e echo.Context) error {
-	id := e.QueryParam("categoryId") // Get "id" parameter from URL
+	id := e.QueryParam("id") // Get "id" parameter from URL
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return c.productService.DeleteCategory(ctx, id)
+		return c.productService.DeleteProduct(ctx, id)
 	})
 }

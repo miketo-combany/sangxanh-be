@@ -9,12 +9,12 @@ import (
 )
 
 type categoryController struct {
-	categoryService service.ProductService
+	categoryService service.CategoryService
 }
 
 func NewCategoryController(di do.Injector) (api.Controller, error) {
 	return &categoryController{
-		categoryService: do.MustInvoke[service.ProductService](di),
+		categoryService: do.MustInvoke[service.CategoryService](di),
 	}, nil
 }
 
