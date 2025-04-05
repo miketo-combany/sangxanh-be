@@ -47,17 +47,11 @@ func (s *productVariantService) ListProductVariants(ctx context.Context, product
 }
 
 // CreateProductVariant inserts a new product variant into the database.
-// It unmarshals the `detail` and `metadata` JSON strings into their respective fields.
 func (s *productVariantService) CreateProductVariant(ctx context.Context, req dto.ProductVariantCreate) (api.Response, error) {
 	// Ensure the referenced product exists (similar to validCategory in your product service).
 	if err := s.validProduct(req.ProductId); err != nil {
 		return nil, err
 	}
-
-	//var metadata map[string]string
-	//if err := json.Unmarshal([]byte(req.Metadata), &metadata); err != nil {
-	//	return nil, fmt.Errorf("invalid metadata format: %v", err)
-	//}
 
 	var created []dto.ProductVariant
 	err := s.db.DB.From("product_variants").

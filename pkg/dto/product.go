@@ -56,6 +56,8 @@ type ProductResponse struct {
 	Discount     float32           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
 	CategoryId   string            `json:"category_id"`
+	CreatedAt    time.Time         `json:"created_at"`
+	UpdatedAt    time.Time         `json:"updated_at"`
 }
 
 type ProductList struct {
@@ -67,6 +69,8 @@ type ProductList struct {
 	Category     CategoryProduct   `json:"categories"`
 	Discount     float64           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
+	CreatedAt    time.Time         `json:"created_at"`
+	UpdatedAt    time.Time         `json:"updated_at"`
 }
 
 type CategoryProduct struct {
