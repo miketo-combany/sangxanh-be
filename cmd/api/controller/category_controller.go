@@ -21,6 +21,7 @@ func NewCategoryController(di do.Injector) (api.Controller, error) {
 func (c *categoryController) Register(g *echo.Group) {
 	g = g.Group("/category")
 	g.GET("", c.List)
+	g.GET("/id", c.GetById)
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
 	g.DELETE("/delete", c.Delete)
@@ -30,6 +31,13 @@ func (c *categoryController) List(e echo.Context) error {
 	name := e.QueryParam("name") // Get "name" parameter from URL
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.categoryService.ListCategories(ctx, name)
+	})
+}
+
+func (c *categoryController) GetById(e echo.Context) error {
+	id := e.QueryParam("id")
+	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+		return c.categoryService.ListCategoryById(ctx, id)
 	})
 }
 

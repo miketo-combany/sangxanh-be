@@ -13,6 +13,7 @@ func RegisterAPI(di do.Injector, e *echo.Group) error {
 		NewProductController,
 		NewCategoryController,
 		NewProductVariantController,
+		NewProductOptionController,
 	}
 
 	for _, c := range controllers {

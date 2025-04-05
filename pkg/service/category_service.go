@@ -18,6 +18,7 @@ type CategoryService interface {
 	ListCategories(ctx context.Context, name string) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
 	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
+	ListCategoryById(ctx context.Context, categoryId string) (api.Response, error)
 }
 
 type categoryService struct {
@@ -31,6 +32,44 @@ func NewCategoryService(di do.Injector) (CategoryService, error) {
 	}
 
 	return &categoryService{db: db}, nil
+}
+
+func (u *categoryService) ListCategoryById(ctx context.Context, categoryId string) (api.Response, error) {
+	// 1. Fetch the category that matches the given ID and has not been soft‑deleted
+	var categories []dto.Category
+	err := u.db.DB.
+		From("categories").
+		Select("*").
+		Eq("id", categoryId).
+		IsNull("deleted_at").
+		Execute(&categories)
+
+	if err != nil {
+		log.Errorf("failed to fetch category %s: %v", categoryId, err)
+		return nil, fmt.Errorf("failed to fetch category")
+	}
+	if len(categories) == 0 {
+		return nil, fmt.Errorf("category not found")
+	}
+	cat := categories[0]
+	var childCategories []dto.Category
+	err = u.db.DB.From("categories").Select("*").Eq("parent_id", categoryId).Execute(&childCategories)
+
+	// 2. Build the response payload (same fields you return elsewhere)
+	categoryResponse := dto.CategoryResponse{
+		Id:          cat.Id,
+		Name:        cat.Name,
+		Thumbnail:   cat.Thumbnail,
+		Level:       cat.Level,
+		Description: cat.Description,
+		Status:      enum.ToStatus(cat.Status),
+		Categories:  childCategories,
+		Metadata:    cat.Metadata,
+		CreatedAt:   cat.CreatedAt,
+		UpdatedAt:   cat.UpdatedAt,
+	}
+
+	return api.Success(categoryResponse), nil
 }
 
 func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error) {
@@ -67,7 +106,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		return nil, err
 	}
 	log.Info("category created", category)
-	categoryResponse := dto.GetResponse(&category[0], nil)
+	categoryResponse := dto.GetResponse(&category[0])
 	return api.Success(categoryResponse), nil
 }
 

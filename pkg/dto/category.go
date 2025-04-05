@@ -2,7 +2,6 @@ package dto
 
 import (
 	"SangXanh/pkg/enum"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -45,7 +44,7 @@ type CategoryResponse struct {
 	Thumbnail   string                 `json:"thumbnail"`
 	Level       int                    `json:"level"`
 	Description string                 `json:"description"`
-	Parent      *CategoryResponse      `json:"parent"`
+	Categories  []Category             `json:"categories"`
 	UpdatedAt   time.Time              `json:"updated_at"`
 	CreatedAt   time.Time              `json:"created_at"`
 	Status      enum.Status            `json:"status"`
@@ -64,7 +63,7 @@ type CategoryListResponse struct {
 	Metadata    map[string]interface{} `json:"metadata"`
 }
 
-func GetResponse(cate *Category, cateParent *Category) CategoryResponse {
+func GetResponse(cate *Category) CategoryResponse {
 	status := enum.Inactive
 	if cate.Status {
 		status = enum.Active
@@ -79,15 +78,6 @@ func GetResponse(cate *Category, cateParent *Category) CategoryResponse {
 		CreatedAt:   cate.CreatedAt,
 		Status:      status,
 		Metadata:    cate.Metadata,
-	}
-	if cate.ParentId != uuid.New().String() && cateParent != nil {
-		cateResponse.Parent = &CategoryResponse{
-			Id:          cateParent.Id,
-			Name:        cateParent.Name,
-			Thumbnail:   cateParent.Thumbnail,
-			Level:       cateParent.Level,
-			Description: cateParent.Description,
-		}
 	}
 	return cateResponse
 }
