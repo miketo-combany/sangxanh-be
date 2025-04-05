@@ -3,7 +3,6 @@ package service
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
-	"SangXanh/pkg/log"
 	"context"
 	"fmt"
 	"github.com/nedpals/supabase-go"
@@ -55,7 +54,6 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %v", err)
 	}
-	log.Info(len(products))
 
 	return api.Success(products), nil
 }

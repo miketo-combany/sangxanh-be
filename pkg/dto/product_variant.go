@@ -28,15 +28,15 @@ type ProductVariantResponse struct {
 }
 
 type ProductVariantCreate struct {
-	Name      string `json:"name"`
-	ProductId string `json:"product_id"`
-	Detail    string `json:"detail"`
-	Metadata  string `json:"metadata"`
+	Name      string                 `json:"name"`
+	ProductId string                 `json:"product_id"`
+	Detail    []ProductVariantDetail `json:"detail"`
+	Metadata  map[string]string      `json:"metadata"`
 }
 
 type ProductVariantUpdate struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	Detail   string `json:"detail"`
-	Metadata string `json:"metadata"`
+	Id       string                 `json:"id"`
+	Name     string                 `json:"name"`
+	Detail   []ProductVariantDetail `json:"detail"`
+	Metadata map[string]string      `json:"metadata"`
 }
