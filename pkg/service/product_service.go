@@ -16,6 +16,7 @@ type ProductService interface {
 	CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error)
 	UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error)
 	DeleteProduct(ctx context.Context, id string) (api.Response, error)
+	GetProductById(ctx context.Context, id string) (api.Response, error)
 }
 
 type productService struct {
@@ -34,7 +35,8 @@ func NewProductService(di do.Injector) (ProductService, error) {
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
 	var products []dto.ProductList
 	query := s.db.DB.From("products").
-		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name)").
+		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 
 	if filter.CategoryId != "" {
@@ -55,7 +57,7 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		return nil, fmt.Errorf("failed to fetch products: %v", err)
 	}
 
-	return api.Success(products), nil
+	return api.SuccessPagination(products, &filter.Pagination), nil
 }
 
 func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error) {
@@ -126,5 +128,52 @@ func (s *productService) validCategory(id string) error {
 		return fmt.Errorf("category not found")
 	}
 	return nil
+}
 
+// GetProductById returns a full product document (base info + category +
+// option list + variant list).  All related rows must not be soft‑deleted.
+func (s *productService) GetProductById(ctx context.Context, id string) (api.Response, error) {
+	// 1) Base product + category ------------------------------------------------
+	var products []dto.ProductDetail
+	if err := s.db.DB.
+		From("products").
+		// pull category name/id exactly like ListProducts
+		Select("id,name,price,content,image_detail,thumbnail,categories!inner(id,name)").
+		Eq("id", id).
+		IsNull("deleted_at").
+		Execute(&products); err != nil {
+		return nil, fmt.Errorf("failed to fetch product: %v", err)
+	}
+	if len(products) == 0 {
+		return nil, fmt.Errorf("product not found")
+	}
+	product := products[0]
+
+	// 2) Product options --------------------------------------------------------
+	var options []dto.ProductOption
+	if err := s.db.DB.
+		From("product_options").
+		Select("id,name,product_id,price,detail,metadata,created_at,updated_at").
+		Eq("product_id", id).
+		IsNull("deleted_at").
+		Execute(&options); err != nil {
+		return nil, fmt.Errorf("failed to fetch product options: %v", err)
+	}
+
+	// 3) Product variants -------------------------------------------------------
+	var variants []dto.ProductVariant
+	if err := s.db.DB.
+		From("product_variants").
+		Select("id,name,product_id,detail,metadata,created_at,updated_at").
+		Eq("product_id", id).
+		IsNull("deleted_at").
+		Execute(&variants); err != nil {
+		return nil, fmt.Errorf("failed to fetch product variants: %v", err)
+	}
+
+	// 4) Assemble & return ------------------------------------------------------
+	product.ProductOptions = options
+	product.ProductVariants = variants
+
+	return api.Success(product), nil
 }

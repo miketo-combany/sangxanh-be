@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"SangXanh/pkg/common/query"
 	"SangXanh/pkg/enum"
 	"time"
 )
@@ -61,6 +62,10 @@ type CategoryListResponse struct {
 	ParentId    string                 `json:"parent_id"`
 	Status      enum.Status            `json:"status"`
 	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+type ListCategory struct {
+	query.Pagination
 }
 
 func GetResponse(cate *Category) CategoryResponse {

@@ -2,10 +2,12 @@ package controller
 
 import (
 	"SangXanh/pkg/common/api"
+	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/do/v2"
+	"net/http"
 )
 
 type categoryController struct {
@@ -28,9 +30,15 @@ func (c *categoryController) Register(g *echo.Group) {
 }
 
 func (c *categoryController) List(e echo.Context) error {
-	name := e.QueryParam("name") // Get "name" parameter from URL
+	var req dto.ListCategory
+	if err := e.Bind(&req); err != nil {
+		return e.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	name := e.QueryParam("name")
+
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return c.categoryService.ListCategories(ctx, name)
+		return c.categoryService.ListCategories(ctx, req, name)
 	})
 }
 

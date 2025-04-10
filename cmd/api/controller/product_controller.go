@@ -24,6 +24,7 @@ func (c *productController) Register(g *echo.Group) {
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
 	g.DELETE("/delete", c.Delete)
+	g.GET("/:id", c.GetById)
 }
 
 func (c *productController) List(e echo.Context) error {
@@ -42,5 +43,12 @@ func (c *productController) Delete(e echo.Context) error {
 	id := e.QueryParam("id") // Get "id" parameter from URL
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.productService.DeleteProduct(ctx, id)
+	})
+}
+
+func (c *productController) GetById(e echo.Context) error {
+	id := e.Param("id")
+	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+		return c.productService.GetProductById(ctx, id)
 	})
 }

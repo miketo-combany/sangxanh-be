@@ -15,7 +15,7 @@ import (
 
 type CategoryService interface {
 	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
-	ListCategories(ctx context.Context, name string) (api.Response, error)
+	ListCategories(ctx context.Context, req dto.ListCategory, name string) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
 	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
 	ListCategoryById(ctx context.Context, categoryId string) (api.Response, error)
@@ -110,7 +110,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 	return api.Success(categoryResponse), nil
 }
 
-func (u *categoryService) ListCategories(ctx context.Context, name string) (api.Response, error) {
+func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCategory, name string) (api.Response, error) {
 	// Step 1: Fetch all categories from Supabase
 	var categories []dto.Category
 	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
@@ -152,7 +152,13 @@ func (u *categoryService) ListCategories(ctx context.Context, name string) (api.
 		categoryResponses = append(categoryResponses, categoryResponseMap[category.Id])
 	}
 
-	return api.Success(categoryResponses), nil
+	if int(req.Limit*req.Page) > len(categoryResponses) {
+		return api.SuccessPagination(nil, &req.Pagination), nil
+	}
+
+	categoryResponsesPage := categoryResponses[req.Limit*(req.Page-1) : req.Limit*req.Page+req.Limit]
+
+	return api.Success(categoryResponsesPage), nil
 }
 
 // Helper function to convert a single category

@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"SangXanh/pkg/common/query"
 	"SangXanh/pkg/enum"
 	"time"
 )
@@ -79,8 +80,21 @@ type CategoryProduct struct {
 }
 
 type ProductFilter struct {
+	query.Pagination
 	CategoryId  string  `json:"category_id"`
 	IsDiscount  bool    `json:"is_discount"`
 	GreaterThan float64 `json:"greater_than"`
 	SmallerThan float64 `json:"smaller_than"`
+}
+
+type ProductDetail struct {
+	Id              string           `json:"id"`
+	Name            string           `json:"name"`
+	Price           float32          `json:"price"`
+	Content         string           `json:"content"`
+	ImageDetail     string           `json:"image_detail"`
+	Thumbnail       string           `json:"thumbnail"`
+	CategoryProduct CategoryProduct  `json:"categories"`
+	ProductOptions  []ProductOption  `json:"product_option_detail"`
+	ProductVariants []ProductVariant `json:"product_variant_detail"`
 }
