@@ -7,7 +7,6 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/do/v2"
-	"net/http"
 )
 
 type categoryController struct {
@@ -23,27 +22,26 @@ func NewCategoryController(di do.Injector) (api.Controller, error) {
 func (c *categoryController) Register(g *echo.Group) {
 	g = g.Group("/category")
 	g.GET("", c.List)
-	g.GET("/id", c.GetById)
+	g.GET("/:id", c.GetById)
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
 	g.DELETE("/delete", c.Delete)
 }
 
 func (c *categoryController) List(e echo.Context) error {
-	var req dto.ListCategory
-	if err := e.Bind(&req); err != nil {
-		return e.JSON(http.StatusBadRequest, err.Error())
-	}
-
+	// Anything that is *not* part of the DTO (here: the free‑text filter "name")
+	// can be taken directly from the query‑string.
 	name := e.QueryParam("name")
 
-	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+	// Let api.Execute bind the query params (`page`, `limit`, …) into
+	// dto.ListCategory and run validation tags automatically.
+	return api.Execute[dto.ListCategory](e, func(ctx context.Context, req dto.ListCategory) (api.Response, error) {
 		return c.categoryService.ListCategories(ctx, req, name)
 	})
 }
 
 func (c *categoryController) GetById(e echo.Context) error {
-	id := e.QueryParam("id")
+	id := e.Param("id")
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.categoryService.ListCategoryById(ctx, id)
 	})

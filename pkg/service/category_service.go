@@ -153,12 +153,14 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	}
 
 	if int(req.Limit*req.Page) > len(categoryResponses) {
-		return api.SuccessPagination(nil, &req.Pagination), nil
+		return api.SuccessPagination(categories, &req.Pagination), nil
 	}
+
+	req.Pagination.Total = int64(len(categoryResponses))
 
 	categoryResponsesPage := categoryResponses[req.Limit*(req.Page-1) : req.Limit*req.Page+req.Limit]
 
-	return api.Success(categoryResponsesPage), nil
+	return api.SuccessPagination(categoryResponsesPage, &req.Pagination), nil
 }
 
 // Helper function to convert a single category

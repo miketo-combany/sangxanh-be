@@ -33,6 +33,13 @@ func (p *Pagination) SetTotal(total int64) {
 	}
 }
 
+func (p *Pagination) Offset() int { return int((p.Page - 1) * p.Limit) }
+func (p *Pagination) Range() (from, to int) {
+	from = p.Offset()
+	to = from + int(p.Limit) - 1
+	return
+}
+
 func (p *Pagination) GetSort() bson.M {
 	if len(p.Sort) == 0 {
 		return nil
