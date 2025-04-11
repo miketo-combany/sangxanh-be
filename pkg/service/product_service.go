@@ -94,11 +94,12 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 		"discount":      req.Discount,
 		"discount_type": req.DiscountType,
 		"metadata":      req.Metadata,
+		"updated_at":    time.Now(),
 	}
 	err := s.validCategory(req.CategoryId)
 
 	var product []dto.Product
-	err = s.db.DB.From("products").Update(updateData).Eq("id", req.Id).Execute(product)
+	err = s.db.DB.From("products").Update(updateData).Eq("id", req.Id).Execute(&product)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update product: %v", err)
 	}
