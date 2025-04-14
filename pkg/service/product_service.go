@@ -80,7 +80,7 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		return nil, fmt.Errorf("failed to create product: %v", err)
 	}
 
-	return api.Success(newProduct), nil
+	return api.Success(product), nil
 }
 
 func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error) {
@@ -103,7 +103,7 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 	if err != nil {
 		return nil, fmt.Errorf("failed to update product: %v", err)
 	}
-	return api.Success("Product updated successfully"), nil
+	return api.Success(product), nil
 }
 
 func (s *productService) DeleteProduct(ctx context.Context, id string) (api.Response, error) {
