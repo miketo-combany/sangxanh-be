@@ -160,6 +160,20 @@ func (s *productService) GetProductById(ctx context.Context, id string) (api.Res
 		Execute(&options); err != nil {
 		return nil, fmt.Errorf("failed to fetch product options: %v", err)
 	}
+	// Compute min and max price from options
+	var minPrice, maxPrice float64
+	if len(options) > 0 {
+		minPrice = options[0].Price
+		maxPrice = options[0].Price
+		for _, opt := range options {
+			if opt.Price < minPrice {
+				minPrice = opt.Price
+			}
+			if opt.Price > maxPrice {
+				maxPrice = opt.Price
+			}
+		}
+	}
 
 	// 3) Product variants -------------------------------------------------------
 	var variants []dto.ProductVariant
@@ -175,6 +189,8 @@ func (s *productService) GetProductById(ctx context.Context, id string) (api.Res
 	// 4) Assemble & return ------------------------------------------------------
 	product.ProductOptions = options
 	product.ProductVariants = variants
+	product.MinPrice = float32(minPrice)
+	product.MaxPrice = float32(maxPrice)
 
 	return api.Success(product), nil
 }

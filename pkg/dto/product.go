@@ -88,16 +88,17 @@ type ProductFilter struct {
 }
 
 type ProductDetail struct {
-	Id           string            `json:"id"`
-	Discount     float32           `json:"discount"`
-	Name         string            `json:"name"`
-	Price        float32           `json:"price"`
-	Content      string            `json:"content"`
-	ImageDetail  string            `json:"image_detail"`
-	Thumbnail    string            `json:"thumbnail"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-
-	CategoryProduct CategoryProduct  `json:"categories"`
-	ProductOptions  []ProductOption  `json:"product_option_detail"`
-	ProductVariants []ProductVariant `json:"product_variant_detail"`
+	Id              string            `json:"id"`
+	Discount        float32           `json:"discount"`
+	Name            string            `json:"name"`
+	Price           float32           `json:"price"`
+	Content         string            `json:"content"`
+	ImageDetail     string            `json:"image_detail"`
+	Thumbnail       string            `json:"thumbnail"`
+	DiscountType    enum.DiscountType `json:"discount_type"`
+	MaxPrice        float32           `json:"max_price"`
+	MinPrice        float32           `json:"min_price"`
+	CategoryProduct CategoryProduct   `json:"categories"`
+	ProductOptions  []ProductOption   `json:"product_option_detail"`
+	ProductVariants []ProductVariant  `json:"product_variant_detail"`
 }
