@@ -2,36 +2,54 @@ package dto
 
 import (
 	"SangXanh/pkg/common/query"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"SangXanh/pkg/enum"
 )
 
 type User struct {
-	ID         primitive.ObjectID `json:"id"`
-	CreatedAt  int64              `json:"created_at,omitempty"`
-	UpdatedAt  int64              `json:"updated_at,omitempty"`
-	Email      string             `json:"email"`
-	Name       string             `json:"name"`
-	GivenName  string             `json:"given_name"`
-	FamilyName string             `json:"family_name"`
-	Avatar     string             `json:"avatar"`
-	Metadata   any                `json:"metadata"`
+	Id           string            `json:"id"`
+	Username     string            `json:"username"`
+	Password     string            `json:"password"`
+	Role         enum.Role         `json:"role"`
+	Address      []Address         `json:"address"`
+	BasicAddress string            `json:"basic_address"`
+	Avatar       string            `json:"avatar"`
+	Phone        string            `json:"phone"`
+	Email        string            `json:"email"`
+	Metadata     map[string]string `json:"metadata"`
 }
 
-type CreateUser struct {
-	Email      string `json:"email" validate:"required,email"`
-	Name       string `json:"name" validate:"required"`
-	GivenName  string `json:"given_name" validate:"required"`
-	FamilyName string `json:"family_name" validate:"required"`
-	Avatar     string `json:"avatar" validate:"required,url"`
-	Metadata   any    `json:"metadata"`
+type Address struct {
+	Name             string `json:"name"`
+	Phone            string `json:"phone"`
+	AddressJson      string `json:"address_json"`
+	IsDefaultAddress bool   `json:"is_default_address"`
+}
+
+type UserRegisterRequest struct {
+	Username     string            `json:"username"`
+	Password     string            `json:"password"`
+	Email        string            `json:"email"`
+	Phone        string            `json:"phone"`
+	Avatar       string            `json:"avatar"`
+	BasicAddress string            `json:"basic_address"`
+	Metadata     map[string]string `json:"metadata"`
+}
+
+type UserUpdateRequest struct {
+	Id           string            `json:"id"`
+	Username     string            `json:"username"`
+	Email        string            `json:"email"`
+	Avatar       string            `json:"avatar"`
+	Phone        string            `json:"phone"`
+	BasicAddress string            `json:"basic_address"`
+	Metadata     map[string]string `json:"metadata"`
+}
+
+type UserUpdateAddressRequest struct {
+	Id      string    `json:"id"`
+	Address []Address `json:"address"`
 }
 
 type ListUser struct {
 	query.Pagination
-	Email string `json:"email" query:"email"`
-}
-
-func (req *ListUser) Query() bson.M {
-	return query.Query().Like("email", req.Email).BSON()
 }

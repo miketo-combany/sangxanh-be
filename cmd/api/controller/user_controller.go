@@ -27,5 +27,5 @@ func (u *userController) List(e echo.Context) error {
 	return api.Execute(e, u.userService.ListUser)
 }
 func (u *userController) Create(e echo.Context) error {
-	return api.Execute(e, u.userService.CreateUser)
+	return api.Execute(e, u.userService.Register)
 }

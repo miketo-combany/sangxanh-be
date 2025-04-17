@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SangXanh/pkg/common/api"
+	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
 	"context"
 	"github.com/labstack/echo/v4"
@@ -28,7 +29,14 @@ func (c *productController) Register(g *echo.Group) {
 }
 
 func (c *productController) List(e echo.Context) error {
-	return api.Execute(e, c.productService.ListProducts)
+	name := e.QueryParam("name")
+
+	// Let api.Execute bind the query params (`page`, `limit`, …) into
+	// dto.ListCategory and run validation tags automatically.
+	return api.Execute[dto.ProductFilter](e, func(ctx context.Context, req dto.ProductFilter) (api.Response, error) {
+		return c.productService.ListProducts(ctx, req, name)
+	})
+
 }
 
 func (c *productController) Create(e echo.Context) error {

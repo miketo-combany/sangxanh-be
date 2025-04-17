@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
+	"net/url"
 	"strconv"
 	"time"
 )
 
 type ProductService interface {
-	ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error)
+	ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error)
 	CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error)
 	UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error)
 	DeleteProduct(ctx context.Context, id string) (api.Response, error)
@@ -32,13 +33,17 @@ func NewProductService(di do.Injector) (ProductService, error) {
 	return &productService{db: db}, nil
 }
 
-func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
+func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error) {
 	var products []dto.ProductList
 	query := s.db.DB.From("products").
 		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 
+	if name != "" {
+		encoded := url.QueryEscape("%" + name + "%")
+		query = query.Like("name", encoded)
+	}
 	if filter.CategoryId != "" {
 		query = query.Eq("category_id", filter.CategoryId)
 	}

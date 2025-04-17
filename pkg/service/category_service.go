@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
+	"net/url"
 	"time"
 )
 
@@ -115,8 +116,8 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	var categories []dto.Category
 	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
 	if name != "" {
-		log.Info("searching for categories by name: ", name)
-		query = query.Like("name", "%"+name+"%")
+		encoded := url.QueryEscape("%" + name + "%")
+		query = query.Like("name", encoded)
 	}
 	err := query.Execute(&categories)
 	if err != nil {

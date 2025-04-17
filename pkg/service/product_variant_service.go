@@ -83,7 +83,7 @@ func (s *productVariantService) UpdateProductVariant(ctx context.Context, req dt
 		return nil, fmt.Errorf("failed to update product variant: %v", err)
 	}
 
-	return api.Success("Product variant updated successfully"), nil
+	return api.Success(updated), nil
 }
 
 // DeleteProductVariant performs a soft delete by setting deleted_at,

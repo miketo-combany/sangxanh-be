@@ -78,7 +78,7 @@ func (s *productOptionService) UpdateProductOption(ctx context.Context, req dto.
 		return nil, fmt.Errorf("failed to update product option: %v", err)
 	}
 
-	return api.Success("Product option updated successfully"), nil
+	return api.Success(updated), nil
 }
 
 func (s *productOptionService) DeleteProductOption(ctx context.Context, id string) (api.Response, error) {

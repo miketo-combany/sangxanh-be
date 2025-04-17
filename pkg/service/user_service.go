@@ -3,52 +3,156 @@ package service
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
-	"SangXanh/pkg/model"
+	"SangXanh/pkg/enum"
+	"SangXanh/pkg/log"
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
-	"time"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
-	ListUser(ctx context.Context, req dto.ListUser) (api.Response, error)
-	CreateUser(ctx context.Context, req dto.CreateUser) (api.Response, error)
+	ListUser(ctx context.Context, user dto.ListUser) (api.Response, error)
+	Register(ctx context.Context, req dto.UserRegisterRequest) (api.Response, error)
+	UpdateUser(ctx context.Context, req dto.UserUpdateRequest) (api.Response, error)
+	UpdateUserAddress(ctx context.Context, req dto.UserUpdateAddressRequest) (api.Response, error)
 }
 
 type userService struct {
 	db *supabase.Client
 }
 
-// NewUserService initializes UserService with Supabase database connection
 func NewUserService(di do.Injector) (UserService, error) {
 	db, err := do.Invoke[*supabase.Client](di)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize UserService: %w", err)
 	}
-
 	return &userService{db: db}, nil
 }
 
-func (u *userService) CreateUser(ctx context.Context, req dto.CreateUser) (api.Response, error) {
-	user := &model.User{
-		Model: model.Model{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
-		Email:         req.Email,
-		Name:          req.Name,
-		GivenName:     req.GivenName,
-		FamilyName:    req.FamilyName,
-		Avatar:        req.Avatar,
-		Metadata:      nil,
-		Organizations: nil,
+// List all users (excluding soft-deleted ones)
+func (s *userService) ListUser(ctx context.Context, user dto.ListUser) (api.Response, error) {
+	var users []dto.User
+	err := s.db.DB.From("users").
+		Select("*").
+		IsNull("deleted_at").
+		Execute(&users)
+	if err != nil {
+		log.Errorf("failed to list users: %v", err)
+		return nil, fmt.Errorf("failed to list users")
 	}
-	return api.Success(user), nil
+	return api.Success(users), nil
 }
 
-func (u *userService) ListUser(ctx context.Context, req dto.ListUser) (api.Response, error) {
-	p := &req.Pagination
-	var users []*model.User
-	return api.SuccessPagination(users, p), nil
+// Register a new user with validation and password hashing
+func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest) (api.Response, error) {
+	if req.Username == "" || req.Password == "" || req.Email == "" {
+		return nil, fmt.Errorf("username, password and email are required")
+	}
+
+	// Check if user already exists
+	var existing []dto.User
+	err := s.db.DB.From("users").Select("*").Eq("username", req.Username).Execute(&existing)
+	if err != nil {
+		log.Errorf("failed to check existing user: %v", err)
+		return nil, fmt.Errorf("failed to register user")
+	}
+	if len(existing) > 0 {
+		return nil, fmt.Errorf("username already exists")
+	}
+
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Errorf("failed to hash password: %v", err)
+		return nil, fmt.Errorf("internal error")
+	}
+
+	user := dto.User{
+		Id:           uuid.New().String(),
+		Username:     req.Username,
+		Password:     string(hashedPassword),
+		Role:         enum.User,
+		BasicAddress: req.BasicAddress,
+		Avatar:       req.Avatar,
+		Phone:        req.Phone,
+		Email:        req.Email,
+		Metadata:     req.Metadata,
+	}
+
+	var inserted []dto.User
+	err = s.db.DB.From("users").Insert(user).Execute(&inserted)
+	if err != nil {
+		log.Errorf("failed to insert user: %v", err)
+		return nil, fmt.Errorf("failed to register user")
+	}
+
+	log.Infof("user registered: %s", user.Username)
+	return api.Success("User registered successfully"), nil
+}
+
+func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest) (api.Response, error) {
+	if req.Id == "" {
+		return nil, fmt.Errorf("user ID is required")
+	}
+
+	// Check if user exists
+	var users []dto.User
+	err := s.db.DB.From("users").Select("*").Eq("id", req.Id).Execute(&users)
+	if err != nil {
+		log.Errorf("failed to find user: %v", err)
+		return nil, fmt.Errorf("user not found")
+	}
+	if len(users) == 0 {
+		return nil, fmt.Errorf("user does not exist")
+	}
+
+	updateData := map[string]interface{}{
+		"username":      req.Username,
+		"email":         req.Email,
+		"avatar":        req.Avatar,
+		"phone":         req.Phone,
+		"basic_address": req.BasicAddress,
+		"metadata":      req.Metadata,
+		"updated_at":    time.Now(),
+	}
+
+	var updated []dto.User
+	err = s.db.DB.From("users").Update(updateData).Eq("id", req.Id).Execute(&updated)
+	if err != nil {
+		log.Errorf("failed to update user: %v", err)
+		return nil, fmt.Errorf("update failed")
+	}
+
+	return api.Success("User profile updated successfully"), nil
+}
+
+func (s *userService) UpdateUserAddress(ctx context.Context, req dto.UserUpdateAddressRequest) (api.Response, error) {
+	if req.Id == "" {
+		return nil, fmt.Errorf("user ID is required")
+	}
+
+	// Check if user exists
+	var users []dto.User
+	err := s.db.DB.From("users").Select("*").Eq("id", req.Id).Execute(&users)
+	if err != nil {
+		log.Errorf("failed to find user: %v", err)
+		return nil, fmt.Errorf("user not found")
+	}
+	if len(users) == 0 {
+		return nil, fmt.Errorf("user does not exist")
+	}
+
+	var updated []dto.User
+	err = s.db.DB.From("users").Update(req.Address).Eq("id", req.Id).Execute(&updated)
+	if err != nil {
+		log.Errorf("failed to update user: %v", err)
+		return nil, fmt.Errorf("update failed")
+	}
+
+	return api.Success("User profile updated successfully"), nil
 }
