@@ -1,9 +1,9 @@
 package api
 
 import (
+	"SangXanh/pkg/common/query"
 	"encoding/json"
 	"fmt"
-	"mindgpt/pkg/common/query"
 	"testing"
 )
 
