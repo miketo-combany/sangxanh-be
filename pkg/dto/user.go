@@ -35,6 +35,15 @@ type UserRegisterRequest struct {
 	Metadata     map[string]string `json:"metadata"`
 }
 
+type UserRegisterData struct {
+	Role         enum.Role         `json:"role"`
+	Username     string            `json:"username"`
+	Phone        string            `json:"phone"`
+	Avatar       string            `json:"avatar"`
+	BasicAddress string            `json:"basic_address"`
+	Metadata     map[string]string `json:"metadata"`
+}
+
 type UserUpdateRequest struct {
 	Id           string            `json:"id"`
 	Username     string            `json:"username"`

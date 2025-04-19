@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -72,16 +71,19 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 		return nil, fmt.Errorf("internal error")
 	}
 
-	user := dto.User{
-		Id:           uuid.New().String(),
+	userData := dto.UserRegisterData{
 		Username:     req.Username,
-		Password:     string(hashedPassword),
 		Role:         enum.User,
 		BasicAddress: req.BasicAddress,
 		Avatar:       req.Avatar,
 		Phone:        req.Phone,
-		Email:        req.Email,
 		Metadata:     req.Metadata,
+	}
+
+	user := supabase.UserCredentials{
+		Email:    req.Email,
+		Password: string(hashedPassword),
+		Data:     userData,
 	}
 
 	var inserted []dto.User
@@ -91,7 +93,6 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 		return nil, fmt.Errorf("failed to register user")
 	}
 
-	log.Infof("user registered: %s", user.Username)
 	return api.Success("User registered successfully"), nil
 }
 

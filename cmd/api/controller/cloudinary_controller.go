@@ -4,6 +4,7 @@ import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/service"
 	"context"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,15 +27,35 @@ func (c *imageController) Register(g *echo.Group) {
 }
 
 func (c *imageController) Upload(e echo.Context) error {
-	// <form-data name="file" type="file">
-	fileHeader, err := e.FormFile("file")
+	// Parse the whole multipart form once. Echo re‑uses http.Request.ParseMultipartForm
+	// so this is cached and cheap even for many fields.
+	form, err := e.MultipartForm()
 	if err != nil {
-		return e.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+		return e.JSON(http.StatusBadRequest, echo.Map{
+			"error": "invalid multipart form: " + err.Error(),
+		})
 	}
 
-	folder := e.FormValue("folder") // optional – e.g. "products"
+	// Preferred: <input type="file" name="files" multiple>
+	files := form.File["files"]
 
+	// Fallback: single <input type="file" name="file">
+	if len(files) == 0 {
+		if fh, err := e.FormFile("file"); err == nil {
+			files = []*multipart.FileHeader{fh}
+		}
+	}
+
+	if len(files) == 0 {
+		return e.JSON(http.StatusBadRequest, echo.Map{
+			"error": "no file uploaded",
+		})
+	}
+
+	folder := e.FormValue("folder") // may be ""
+
+	// Pass the slice straight through to the service
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return c.imageSvc.UploadImage(ctx, fileHeader, folder)
+		return c.imageSvc.UploadImages(ctx, files, folder)
 	})
 }
