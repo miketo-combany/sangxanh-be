@@ -43,7 +43,7 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Resp
 		return nil, fmt.Errorf("invalid username or password")
 	}
 
-	accessToken, err := util.GenerateAccessToken(user.Id)
+	accessToken, err := util.GenerateAccessToken(user.Id, string(user.Role))
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +59,12 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Resp
 }
 
 func (s *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) (api.Response, error) {
-	claims, err := util.ParseToken(req.RefreshToken, true)
+	claims, err := util.ParseToken(req.RefreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("invalid refresh token")
 	}
 
-	newAccessToken, err := util.GenerateAccessToken(claims.UserID)
+	newAccessToken, err := util.GenerateAccessToken(claims.UserID, claims.UserRole)
 	if err != nil {
 		return nil, err
 	}

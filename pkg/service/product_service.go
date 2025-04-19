@@ -33,7 +33,40 @@ func NewProductService(di do.Injector) (ProductService, error) {
 	return &productService{db: db}, nil
 }
 
+func (s *productService) countProducts(ctx context.Context, filter dto.ProductFilter) (int, error) {
+	// Start the same base query you use in ListProducts
+	q := s.db.DB.From("products").
+		Select("id").
+		IsNull("deleted_at") // keep soft‑deleted rows out
+	// Apply the same filter conditions
+	if filter.CategoryId != "" {
+		q = q.Eq("category_id", filter.CategoryId)
+	}
+	if filter.IsDiscount {
+		q = q.Not().IsNull("discount")
+	}
+	if filter.GreaterThan > 0 {
+		q = q.Gt("price", strconv.FormatFloat(filter.GreaterThan, 'f', -1, 32))
+	}
+	if filter.SmallerThan > 0 {
+		q = q.Lt("price", strconv.FormatFloat(filter.SmallerThan, 'f', -1, 32))
+	}
+
+	// Execute, discard the row data, keep the count
+	var tmp []struct{} // dummy slice – we only care about the header that carries the count
+	if err := q.Execute(&tmp); err != nil {
+		return 0, fmt.Errorf("failed to count products: %w", err)
+	}
+
+	return len(tmp), nil
+}
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error) {
+	total, err := s.countProducts(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. fetch the current page
 	var products []dto.ProductList
 	query := s.db.DB.From("products").
 		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
@@ -57,11 +90,12 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		query = query.Lt("price", strconv.FormatFloat(filter.SmallerThan, 'f', -1, 32))
 	}
 
-	err := query.Execute(&products)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch products: %v", err)
+	if err := query.Execute(&products); err != nil {
+		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
 
+	// 3. fill in pagination meta & return
+	filter.Pagination.Total = int64(total)
 	return api.SuccessPagination(products, &filter.Pagination), nil
 }
 
@@ -85,7 +119,7 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		return nil, fmt.Errorf("failed to create product: %v", err)
 	}
 
-	return api.Success(product), nil
+	return api.Success(product[0]), nil
 }
 
 func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error) {
@@ -108,7 +142,7 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 	if err != nil {
 		return nil, fmt.Errorf("failed to update product: %v", err)
 	}
-	return api.Success(product), nil
+	return api.Success(product[0]), nil
 }
 
 func (s *productService) DeleteProduct(ctx context.Context, id string) (api.Response, error) {
@@ -144,7 +178,7 @@ func (s *productService) GetProductById(ctx context.Context, id string) (api.Res
 	if err := s.db.DB.
 		From("products").
 		// pull category name/id exactly like ListProducts
-		Select("id,name,price,content,image_detail,thumbnail,categories!inner(id,name)").
+		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		Eq("id", id).
 		IsNull("deleted_at").
 		Execute(&products); err != nil {
