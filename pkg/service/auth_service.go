@@ -3,12 +3,11 @@ package service
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
-	"SangXanh/pkg/util"
+	"SangXanh/pkg/log"
 	"context"
 	"fmt"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
@@ -28,49 +27,53 @@ func NewAuthService(di do.Injector) (AuthService, error) {
 	return &authService{db: db}, nil
 }
 
-func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Response, error) {
-	var users []dto.User
-	err := s.db.DB.From("users").
-		Select("*").
-		Eq("username", req.Username).
-		Execute(&users)
-	if err != nil || len(users) == 0 {
-		return nil, fmt.Errorf("invalid username or password")
+func (a *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Response, error) {
+	if req.Password == "" || (req.Email == "" && req.Username == "") {
+		return nil, fmt.Errorf("email/username and password are required")
 	}
 
-	user := users[0]
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, fmt.Errorf("invalid username or password")
+	// If login with username, you must first find the user's email
+	email := req.Email
+	if email == "" {
+		var users []dto.User
+		err := a.db.DB.From("users").Select("email").Eq("username", req.Username).Execute(&users)
+		if err != nil || len(users) == 0 {
+			return nil, fmt.Errorf("user not found")
+		}
+		email = users[0].Email
 	}
 
-	accessToken, err := util.GenerateAccessToken(user.Id, string(user.Role))
+	session, err := a.db.Auth.SignIn(ctx, supabase.UserCredentials{
+		Email:    email,
+		Password: req.Password,
+	})
 	if err != nil {
-		return nil, err
-	}
-	refreshToken, err := util.GenerateRefreshToken(user.Id)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("login failed: %v", err)
 	}
 
-	return api.Success(dto.AuthResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}), nil
+	resp := dto.AuthResponse{
+		AccessToken:  session.AccessToken,
+		RefreshToken: session.RefreshToken,
+	}
+
+	return api.Success(resp), nil
 }
 
-func (s *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) (api.Response, error) {
-	claims, err := util.ParseToken(req.RefreshToken)
-	if err != nil {
-		return nil, fmt.Errorf("invalid refresh token")
+func (a *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) (api.Response, error) {
+	if req.RefreshToken == "" {
+		return nil, fmt.Errorf("refresh token is required")
 	}
 
-	newAccessToken, err := util.GenerateAccessToken(claims.UserID, claims.UserRole)
+	authDetails, err := a.db.Auth.RefreshUser(ctx, "", req.RefreshToken)
 	if err != nil {
-		return nil, err
+		log.Errorf("failed to refresh session: %v", err)
+		return nil, fmt.Errorf("failed to refresh token")
 	}
 
-	return api.Success(dto.AuthResponse{
-		AccessToken:  newAccessToken,
-		RefreshToken: req.RefreshToken,
-	}), nil
+	resp := dto.AuthResponse{
+		AccessToken:  authDetails.AccessToken,
+		RefreshToken: authDetails.RefreshToken,
+	}
+
+	return api.Success(resp), nil
 }

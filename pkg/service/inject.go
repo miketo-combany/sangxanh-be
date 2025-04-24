@@ -9,4 +9,5 @@ func Inject(di do.Injector) {
 	do.Provide(di, NewProductVariantService)
 	do.Provide(di, NewProductOptionService)
 	do.Provide(di, NewImageService)
+	do.Provide(di, NewAuthService)
 }
