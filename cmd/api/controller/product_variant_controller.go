@@ -24,6 +24,8 @@ func (c *productVariantController) Register(g *echo.Group) {
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
 	g.DELETE("/delete", c.Delete)
+	g.POST("/create-bulk", c.CreateBulk)
+	g.PUT("/update-bulk", c.UpdateBulk)
 }
 
 func (c *productVariantController) List(e echo.Context) error {
@@ -46,4 +48,12 @@ func (c *productVariantController) Delete(e echo.Context) error {
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.productVariantService.DeleteProductVariant(ctx, id)
 	})
+}
+
+func (c *productVariantController) CreateBulk(e echo.Context) error {
+	return api.Execute(e, c.productVariantService.CreateBulkProductVariant)
+}
+
+func (c *productVariantController) UpdateBulk(e echo.Context) error {
+	return api.Execute(e, c.productVariantService.UpdateBulkProductVariant)
 }

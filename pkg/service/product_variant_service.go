@@ -16,6 +16,8 @@ type ProductVariantService interface {
 	CreateProductVariant(ctx context.Context, req dto.ProductVariantCreate) (api.Response, error)
 	UpdateProductVariant(ctx context.Context, req dto.ProductVariantUpdate) (api.Response, error)
 	DeleteProductVariant(ctx context.Context, id string) (api.Response, error)
+	CreateBulkProductVariant(ctx context.Context, reqs dto.ProductVariantCreateBulk) (api.Response, error)
+	UpdateBulkProductVariant(ctx context.Context, reqs dto.ProductVariantUpdateBulk) (api.Response, error)
 }
 
 type productVariantService struct {
@@ -61,7 +63,7 @@ func (s *productVariantService) CreateProductVariant(ctx context.Context, req dt
 		return nil, fmt.Errorf("failed to create product variant: %v", err)
 	}
 
-	return api.Success(created), nil
+	return api.Success(created[0]), nil
 }
 
 // UpdateProductVariant updates an existing product variant's fields.
@@ -83,7 +85,7 @@ func (s *productVariantService) UpdateProductVariant(ctx context.Context, req dt
 		return nil, fmt.Errorf("failed to update product variant: %v", err)
 	}
 
-	return api.Success(updated), nil
+	return api.Success(updated[0]), nil
 }
 
 // DeleteProductVariant performs a soft delete by setting deleted_at,
@@ -121,4 +123,58 @@ func (s *productVariantService) validProduct(id string) error {
 		return fmt.Errorf("product not found")
 	}
 	return nil
+}
+
+func (s *productVariantService) CreateBulkProductVariant(ctx context.Context, reqs dto.ProductVariantCreateBulk) (api.Response, error) {
+	// Validate if product exists
+	if err := s.validProduct(reqs.ProductId); err != nil {
+		return nil, err
+	}
+
+	// Attach productId to all variants (safety)
+	for i := range reqs.Variants {
+		reqs.Variants[i].ProductId = reqs.ProductId
+	}
+
+	var created []dto.ProductVariant
+	err := s.db.DB.From("product_variants").
+		Insert(reqs.Variants).
+		Execute(&created)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bulk create product variants: %v", err)
+	}
+
+	return api.Success(created), nil
+}
+
+func (s *productVariantService) UpdateBulkProductVariant(ctx context.Context, reqs dto.ProductVariantUpdateBulk) (api.Response, error) {
+	// Validate if product exists
+	if err := s.validProduct(reqs.ProductId); err != nil {
+		return nil, err
+	}
+
+	updatedVariants := []dto.ProductVariant{}
+
+	for _, req := range reqs.Variants {
+		updateData := map[string]interface{}{
+			"name":       req.Name,
+			"detail":     req.Detail,
+			"metadata":   req.Metadata,
+			"updated_at": time.Now(),
+		}
+
+		var updated []dto.ProductVariant
+		err := s.db.DB.From("product_variants").
+			Update(updateData).
+			Eq("id", req.Id).
+			Eq("product_id", reqs.ProductId). // make sure belongs to correct product
+			Execute(&updated)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update product variant with id %s: %v", req.Id, err)
+		}
+
+		updatedVariants = append(updatedVariants, updated[0])
+	}
+
+	return api.Success(updatedVariants), nil
 }

@@ -7,7 +7,7 @@ type ProductOption struct {
 	Name      string                `json:"name"`
 	ProductId string                `json:"product_id"`
 	Price     float64               `json:"price"`
-	Metadata  map[string]string     `json:"metadata"`
+	Metadata  []map[string]string   `json:"metadata"`
 	Detail    []ProductOptionDetail `json:"detail"`
 	CreatedAt time.Time             `json:"created_at"`
 	UpdatedAt time.Time             `json:"updated_at"`
@@ -18,12 +18,22 @@ type ProductOptionDetail struct {
 	Name      string `json:"name"`
 }
 
+type ProductOptionCreateBulk struct {
+	ProductId string                `json:"product_id"`
+	Options   []ProductOptionCreate `json:"options"`
+}
+
+type ProductOptionBulkUpdate struct {
+	ProductId string                `json:"product_id"`
+	Options   []ProductOptionUpdate `json:"options"`
+}
+
 type ProductOptionCreate struct {
 	Name      string                `json:"name"`
 	ProductId string                `json:"product_id"`
 	Price     float64               `json:"price"`
 	Detail    []ProductOptionDetail `json:"detail"`
-	Metadata  map[string]string     `json:"metadata"`
+	Metadata  []map[string]string   `json:"metadata"`
 }
 
 type ProductOptionUpdate struct {
@@ -32,5 +42,5 @@ type ProductOptionUpdate struct {
 	ProductId string                `json:"product_id"`
 	Price     float64               `json:"price"`
 	Detail    []ProductOptionDetail `json:"detail"`
-	Metadata  map[string]string     `json:"metadata"`
+	Metadata  []map[string]string   `json:"metadata"`
 }
