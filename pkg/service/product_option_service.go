@@ -43,7 +43,7 @@ func (s *productOptionService) ListProductOptions(ctx context.Context, productId
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch product options: %v", err)
 	}
-	return api.Success(options[0]), nil
+	return api.Success(options), nil
 }
 
 func (s *productOptionService) CreateProductOption(ctx context.Context, req dto.ProductOptionCreate) (api.Response, error) {
@@ -143,39 +143,96 @@ func (s *productOptionService) CreateBulkProductOption(ctx context.Context, req 
 	return api.Success(created), nil
 }
 
-func (s *productOptionService) UpdateBulkProductOption(ctx context.Context, req dto.ProductOptionBulkUpdate) (api.Response, error) {
+func (s *productOptionService) UpdateBulkProductOption(
+	ctx context.Context,
+	req dto.ProductOptionBulkUpdate,
+) (api.Response, error) {
+
+	// 0️⃣  Sanity checks -----------------------------------------------------
 	if len(req.Options) == 0 {
 		return nil, fmt.Errorf("no product options to update")
 	}
-
-	// Validate the product exists
 	if err := s.validProduct(req.ProductId); err != nil {
 		return nil, err
 	}
 
-	var updatedOptions []dto.ProductOption
+	// 1️⃣  Load current, non-deleted options for this product ---------------
+	var current []dto.ProductOption
+	if err := s.db.DB.
+		From("product_options").
+		Select("id").
+		Eq("product_id", req.ProductId).
+		IsNull("deleted_at").
+		Execute(&current); err != nil {
+		return nil, fmt.Errorf("failed to fetch current product options: %v", err)
+	}
 
-	for _, option := range req.Options {
-		// Ensure the option belongs to the correct productId
+	existingIDs := map[string]bool{}
+	for _, opt := range current {
+		existingIDs[opt.Id] = true
+	}
+
+	// 2️⃣  Iterate over the payload ----------------------------------------
+	now := time.Now()
+	payloadIDs := map[string]bool{}
+	var result []dto.ProductOption
+
+	for _, opt := range req.Options {
+		if opt.Id == "" { // --- CREATE -------------------------------------
+			opt.ProductId = req.ProductId
+			createProduct := dto.ProductOptionCreate{
+				ProductId: req.ProductId,
+				Name:      opt.Name,
+				Price:     opt.Price,
+				Detail:    opt.Detail,
+				Metadata:  opt.Metadata,
+			}
+			var created []dto.ProductOption
+			if err := s.db.DB.
+				From("product_options").
+				Insert(createProduct).
+				Execute(&created); err != nil {
+				return nil, fmt.Errorf("failed to create option %q: %v", opt.Name, err)
+			}
+			result = append(result, created...)
+			continue
+		}
+
+		// --- UPDATE --------------------------------------------------------
+		payloadIDs[opt.Id] = true
+
 		updateData := map[string]interface{}{
-			"name":       option.Name,
-			"price":      option.Price,
-			"detail":     option.Detail,
-			"metadata":   option.Metadata,
-			"updated_at": time.Now(),
+			"name":       opt.Name,
+			"price":      opt.Price,
+			"detail":     opt.Detail,
+			"metadata":   opt.Metadata,
+			"updated_at": now,
 		}
 
 		var updated []dto.ProductOption
 		if err := s.db.DB.
 			From("product_options").
 			Update(updateData).
-			Eq("id", option.Id).
+			Eq("id", opt.Id).
+			Eq("product_id", req.ProductId). // extra guard
 			Execute(&updated); err != nil {
-			return nil, fmt.Errorf("failed to update product option ID %s: %v", option.Id, err)
+			return nil, fmt.Errorf("failed to update option %s: %v", opt.Id, err)
 		}
-
-		updatedOptions = append(updatedOptions, updated...)
+		result = append(result, updated...)
 	}
 
-	return api.Success(updatedOptions), nil
+	// 3️⃣  Soft-delete rows not included in the payload ---------------------
+	for id := range existingIDs {
+		if !payloadIDs[id] {
+			if err := s.db.DB.
+				From("product_options").
+				Update(map[string]interface{}{"deleted_at": now}).
+				Eq("id", id).
+				Execute(nil); err != nil { // no RETURNING needed
+				return nil, fmt.Errorf("failed to soft-delete option %s: %v", id, err)
+			}
+		}
+	}
+
+	return api.Success(result), nil
 }
