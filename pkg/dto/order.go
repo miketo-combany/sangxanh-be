@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"SangXanh/pkg/common/query"
 	"SangXanh/pkg/enum"
 	"time"
 )
@@ -39,10 +40,11 @@ type OrderDetailBase struct {
 }
 
 type OrderCreate struct {
-	UserId   string                   `json:"user_id"`
-	Address  string                   `json:"address"`
-	Status   enum.OrderStatus         `json:"status"`
-	Metadata []map[string]interface{} `json:"metadata"`
+	UserId       string                   `json:"user_id"`
+	Address      string                   `json:"address"`
+	Status       enum.OrderStatus         `json:"status"`
+	Metadata     []map[string]interface{} `json:"metadata"`
+	OrderDetails []OrderDetailBase        `json:"order_details"`
 }
 type OrderUpdate struct {
 	Id           string                   `json:"id"`
@@ -60,4 +62,5 @@ type OrderDetailResponse struct {
 
 type OrderListFilter struct {
 	Status enum.OrderStatus `json:"status"`
+	query.Pagination
 }
