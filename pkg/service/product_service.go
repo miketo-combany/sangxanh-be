@@ -60,6 +60,7 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 
 	return len(tmp), nil
 }
+
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error) {
 	total, err := s.countProducts(ctx, filter)
 	if err != nil {

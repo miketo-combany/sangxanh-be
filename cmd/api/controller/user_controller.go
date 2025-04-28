@@ -2,10 +2,17 @@ package controller
 
 import (
 	"SangXanh/pkg/common/api"
+	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
+	"context"
+
 	"github.com/labstack/echo/v4"
 	"github.com/samber/do/v2"
 )
+
+// --------------------------------------------------------------------
+// Controller struct & factory
+// --------------------------------------------------------------------
 
 type userController struct {
 	userService service.UserService
@@ -17,15 +24,48 @@ func NewUserController(di do.Injector) (api.Controller, error) {
 	}, nil
 }
 
-func (u *userController) Register(g *echo.Group) {
+// --------------------------------------------------------------------
+// Route registration
+// --------------------------------------------------------------------
+
+func (c *userController) Register(g *echo.Group) {
 	g = g.Group("/user")
-	g.GET("", u.List)
-	g.POST("", u.Create)
+
+	g.GET("", c.List)
+	g.POST("/register", c.Create)
+	g.PUT("/update", c.Update)
+	g.PUT("/address", c.Address)
+
+	g.GET("/:id", c.GetById) // ← NEW
 }
 
-func (u *userController) List(e echo.Context) error {
-	return api.Execute(e, u.userService.ListUser)
+func (c *userController) GetById(e echo.Context) error {
+	id := e.Param("id")
+
+	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+		return c.userService.GetUserById(ctx, id)
+	})
 }
-func (u *userController) Create(e echo.Context) error {
-	return api.Execute(e, u.userService.Register)
+
+// GET /user
+func (c *userController) List(e echo.Context) error {
+	name := e.QueryParam("name")
+	return api.Execute[dto.ListUser](e, func(ctx context.Context, req dto.ListUser) (api.Response, error) {
+		return c.userService.ListUser(ctx, req, name)
+	})
+}
+
+// POST /user/register
+func (c *userController) Create(e echo.Context) error {
+	return api.Execute(e, c.userService.Register)
+}
+
+// PUT /user/update
+func (c *userController) Update(e echo.Context) error {
+	return api.Execute(e, c.userService.UpdateUser)
+}
+
+// PATCH /user/address
+func (c *userController) Address(e echo.Context) error {
+	return api.Execute(e, c.userService.UpdateUserAddress)
 }
