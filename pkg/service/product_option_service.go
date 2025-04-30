@@ -32,18 +32,59 @@ func NewProductOptionService(di do.Injector) (ProductOptionService, error) {
 	return &productOptionService{db: db}, nil
 }
 
-func (s *productOptionService) ListProductOptions(ctx context.Context, productId string) (api.Response, error) {
-	var options []dto.ProductOption
-	err := s.db.DB.
+func (s *productOptionService) ListProductOptions(
+	ctx context.Context,
+	productId string,
+) (api.Response, error) {
+
+	// ─── ① fetch options (same as before) ──────────────────────────────────
+	var raw []dto.ProductOption
+	if err := s.db.DB.
 		From("product_options").
 		Select("id,name,product_id,price,detail,metadata,created_at,updated_at").
 		Eq("product_id", productId).
 		IsNull("deleted_at").
-		Execute(&options)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch product options: %v", err)
+		Execute(&raw); err != nil {
+		return nil, fmt.Errorf("failed to fetch product options: %w", err)
 	}
-	return api.Success(options), nil
+
+	// ─── ② collect every variant_id we saw ─────────────────────────────────
+	var variantIDs []string
+	for _, opt := range raw {
+		for _, d := range opt.Detail {
+			variantIDs = append(variantIDs, d.VariantId)
+		}
+	}
+
+	// ─── ③ one query to resolve names ─────────────────────────────────────
+	nameByID, err := s.loadVariantNames(productId, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// ─── ④ build response DTOs ────────────────────────────────────────────
+	out := make([]dto.ProductOptionResponse, 0, len(raw))
+	for _, opt := range raw {
+		rsp := dto.ProductOptionResponse{
+			Id:        opt.Id,
+			Name:      opt.Name,
+			ProductId: opt.ProductId,
+			Price:     opt.Price,
+			Metadata:  opt.Metadata,
+			CreatedAt: opt.CreatedAt,
+			UpdatedAt: opt.UpdatedAt,
+		}
+		for _, d := range opt.Detail {
+			rsp.Detail = append(rsp.Detail, dto.ProductOptionVariantDetail{
+				VariantId:    d.VariantId,
+				VariantName:  nameByID[d.VariantId], // “Color”, “Size”,…
+				VariantValue: d.Name,                // payload’s Name field
+			})
+		}
+		out = append(out, rsp)
+	}
+
+	return api.Success(out), nil
 }
 
 func (s *productOptionService) CreateProductOption(ctx context.Context, req dto.ProductOptionCreate) (api.Response, error) {
@@ -127,6 +168,17 @@ func (s *productOptionService) CreateBulkProductOption(ctx context.Context, req 
 		return nil, fmt.Errorf("validation failed for product_id %s: %w", req.ProductId, err)
 	}
 
+	var allIds []string
+	for _, opt := range req.Options {
+		for _, d := range opt.Detail {
+			allIds = append(allIds, d.VariantId)
+		}
+	}
+	_, err := s.fetchAndValidateVariants(req.ProductId, allIds)
+	if err != nil {
+		return nil, err
+	}
+
 	// Set productId into all options
 	for i := range req.Options {
 		req.Options[i].ProductId = req.ProductId
@@ -153,6 +205,16 @@ func (s *productOptionService) UpdateBulkProductOption(
 		return nil, fmt.Errorf("no product options to update")
 	}
 	if err := s.validProduct(req.ProductId); err != nil {
+		return nil, err
+	}
+	var allIds []string
+	for _, opt := range req.Options {
+		for _, d := range opt.Detail {
+			allIds = append(allIds, d.VariantId)
+		}
+	}
+	_, err := s.fetchAndValidateVariants(req.ProductId, allIds)
+	if err != nil {
 		return nil, err
 	}
 
@@ -235,4 +297,93 @@ func (s *productOptionService) UpdateBulkProductOption(
 	}
 
 	return api.Success(result), nil
+}
+
+func (s *productOptionService) fetchAndValidateVariants(
+	productId string,
+	variantIDs []string,
+) (map[string]string, error) {
+
+	// de-duplicate to keep the SQL IN (…) short
+	uniq := make(map[string]struct{}, len(variantIDs))
+	for _, id := range variantIDs {
+		uniq[id] = struct{}{}
+	}
+	ids := make([]string, 0, len(uniq))
+	for id := range uniq {
+		ids = append(ids, id)
+	}
+
+	// ---- single query ----------------------------------------------------
+	var rows []struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+	if err := s.db.DB.
+		From("product_variants").
+		Select("id,name").
+		Eq("product_id", productId).
+		In("id", ids).
+		IsNull("deleted_at").
+		Execute(&rows); err != nil {
+		return nil, fmt.Errorf("failed to load variants: %w", err)
+	}
+
+	names := make(map[string]string, len(rows))
+	for _, r := range rows {
+		names[r.Id] = r.Name
+		delete(uniq, r.Id) // remove anything we actually found
+	}
+
+	// anything still in uniq is missing in DB ------------------------------
+	if len(uniq) > 0 {
+		missing := make([]string, 0, len(uniq))
+		for id := range uniq {
+			missing = append(missing, id)
+		}
+		return names, fmt.Errorf("unknown variant_id(s): %v", missing)
+	}
+
+	return names, nil // every id is legit
+}
+
+// returns map[variantId]variantName (empty map if no IDs given)
+func (s *productOptionService) loadVariantNames(
+	productId string,
+	variantIDs []string,
+) (map[string]string, error) {
+
+	if len(variantIDs) == 0 {
+		return map[string]string{}, nil
+	}
+
+	// deduplicate so the SQL IN (…) stays short
+	uniq := make(map[string]struct{}, len(variantIDs))
+	for _, id := range variantIDs {
+		uniq[id] = struct{}{}
+	}
+	ids := make([]string, 0, len(uniq))
+	for id := range uniq {
+		ids = append(ids, id)
+	}
+
+	var rows []struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+	if err := s.db.DB.
+		From("product_variants").
+		Select("id,name").
+		Eq("product_id", productId).
+		In("id", ids).
+		IsNull("deleted_at").
+		Execute(&rows); err != nil {
+		return nil, fmt.Errorf("failed to load variant names: %w", err)
+	}
+
+	out := make(map[string]string, len(rows))
+	for _, r := range rows {
+		out[r.Id] = r.Name
+	}
+	return out, nil
 }

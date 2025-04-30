@@ -44,3 +44,20 @@ type ProductOptionUpdate struct {
 	Detail    []ProductOptionDetail `json:"detail"`
 	Metadata  []map[string]string   `json:"metadata"`
 }
+
+type ProductOptionResponse struct {
+	Id        string                       `json:"id"`
+	Name      string                       `json:"name"`
+	ProductId string                       `json:"product_id"`
+	Price     float64                      `json:"price"`
+	Metadata  []map[string]string          `json:"metadata"`
+	Detail    []ProductOptionVariantDetail `json:"detail"`
+	CreatedAt time.Time                    `json:"created_at"`
+	UpdatedAt time.Time                    `json:"updated_at"`
+}
+
+type ProductOptionVariantDetail struct {
+	VariantId    string `json:"variant_id"`
+	VariantName  string `json:"variant_name"`
+	VariantValue string `json:"variant_value"` // == Name from the request
+}

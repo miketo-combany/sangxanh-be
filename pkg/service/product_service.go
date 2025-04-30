@@ -173,49 +173,97 @@ func (s *productService) validCategory(id string) error {
 
 // GetProductById returns a full product document (base info + category +
 // option list + variant list).  All related rows must not be soft‑deleted.
-func (s *productService) GetProductById(ctx context.Context, id string) (api.Response, error) {
-	// 1) Base product + category ------------------------------------------------
-	var products []dto.ProductDetail
+func (s *productService) GetProductById(
+	ctx context.Context,
+	id string,
+) (api.Response, error) {
+
+	/*───────────────────────────────────────────────────────*
+	 * 1)   Base product (+ category)                       *
+	 *───────────────────────────────────────────────────────*/
+	var rows []dto.ProductDetail
 	if err := s.db.DB.
 		From("products").
-		// pull category name/id exactly like ListProducts
-		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select(`id,name,price,content,image_detail,category_id,
+                thumbnail,discount,discount_type,
+                categories!inner(id,name),
+                created_at,updated_at`).
 		Eq("id", id).
 		IsNull("deleted_at").
-		Execute(&products); err != nil {
-		return nil, fmt.Errorf("failed to fetch product: %v", err)
+		Execute(&rows); err != nil {
+		return nil, fmt.Errorf("failed to fetch product: %w", err)
 	}
-	if len(products) == 0 {
+	if len(rows) == 0 {
 		return nil, fmt.Errorf("product not found")
 	}
-	product := products[0]
+	product := rows[0]
 
-	// 2) Product options --------------------------------------------------------
-	var options []dto.ProductOption
+	/*───────────────────────────────────────────────────────*
+	 * 2)   Options (raw)                                   *
+	 *───────────────────────────────────────────────────────*/
+	var optRaw []dto.ProductOption
 	if err := s.db.DB.
 		From("product_options").
 		Select("id,name,product_id,price,detail,metadata,created_at,updated_at").
 		Eq("product_id", id).
 		IsNull("deleted_at").
-		Execute(&options); err != nil {
-		return nil, fmt.Errorf("failed to fetch product options: %v", err)
-	}
-	// Compute min and max price from options
-	var minPrice, maxPrice float64
-	if len(options) > 0 {
-		minPrice = options[0].Price
-		maxPrice = options[0].Price
-		for _, opt := range options {
-			if opt.Price < minPrice {
-				minPrice = opt.Price
-			}
-			if opt.Price > maxPrice {
-				maxPrice = opt.Price
-			}
-		}
+		Execute(&optRaw); err != nil {
+		return nil, fmt.Errorf("failed to fetch product options: %w", err)
 	}
 
-	// 3) Product variants -------------------------------------------------------
+	/*── gather variant_ids for a single name-lookup query ─*/
+	var variantIDs []string
+	for _, o := range optRaw {
+		for _, d := range o.Detail {
+			variantIDs = append(variantIDs, d.VariantId)
+		}
+	}
+	nameByID, err := s.loadVariantNames(id, variantIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	/*── enrich options + compute min/max price ────────────*/
+	var (
+		opts     []dto.ProductOptionResponse
+		minPrice float64
+		maxPrice float64
+	)
+	if len(optRaw) > 0 {
+		minPrice, maxPrice = optRaw[0].Price, optRaw[0].Price
+	}
+
+	for _, o := range optRaw {
+		if o.Price < minPrice {
+			minPrice = o.Price
+		}
+		if o.Price > maxPrice {
+			maxPrice = o.Price
+		}
+
+		view := dto.ProductOptionResponse{
+			Id:        o.Id,
+			Name:      o.Name,
+			ProductId: o.ProductId,
+			Price:     o.Price,
+			Metadata:  o.Metadata,
+			CreatedAt: o.CreatedAt,
+			UpdatedAt: o.UpdatedAt,
+		}
+
+		for _, d := range o.Detail {
+			view.Detail = append(view.Detail, dto.ProductOptionVariantDetail{
+				VariantId:    d.VariantId,
+				VariantName:  nameByID[d.VariantId],
+				VariantValue: d.Name, // same value you asked for
+			})
+		}
+		opts = append(opts, view)
+	}
+
+	/*───────────────────────────────────────────────────────*
+	 * 3)   Variants list (unchanged fetch)                 *
+	 *───────────────────────────────────────────────────────*/
 	var variants []dto.ProductVariant
 	if err := s.db.DB.
 		From("product_variants").
@@ -223,14 +271,57 @@ func (s *productService) GetProductById(ctx context.Context, id string) (api.Res
 		Eq("product_id", id).
 		IsNull("deleted_at").
 		Execute(&variants); err != nil {
-		return nil, fmt.Errorf("failed to fetch product variants: %v", err)
+		return nil, fmt.Errorf("failed to fetch product variants: %w", err)
 	}
 
-	// 4) Assemble & return ------------------------------------------------------
-	product.ProductOptions = options
+	/*───────────────────────────────────────────────────────*
+	 * 4)   Assemble response                               *
+	 *───────────────────────────────────────────────────────*/
+	product.ProductOptions = opts
 	product.ProductVariants = variants
 	product.MinPrice = float32(minPrice)
 	product.MaxPrice = float32(maxPrice)
 
 	return api.Success(product), nil
+}
+
+// returns map[variantId]variantName (empty map if no IDs given)
+func (s *productService) loadVariantNames(
+	productId string,
+	variantIDs []string,
+) (map[string]string, error) {
+
+	if len(variantIDs) == 0 {
+		return map[string]string{}, nil
+	}
+
+	// deduplicate so the SQL IN (…) stays short
+	uniq := make(map[string]struct{}, len(variantIDs))
+	for _, id := range variantIDs {
+		uniq[id] = struct{}{}
+	}
+	ids := make([]string, 0, len(uniq))
+	for id := range uniq {
+		ids = append(ids, id)
+	}
+
+	var rows []struct {
+		Id   string `json:"id"`
+		Name string `json:"name"`
+	}
+	if err := s.db.DB.
+		From("product_variants").
+		Select("id,name").
+		Eq("product_id", productId).
+		In("id", ids).
+		IsNull("deleted_at").
+		Execute(&rows); err != nil {
+		return nil, fmt.Errorf("failed to load variant names: %w", err)
+	}
+
+	out := make(map[string]string, len(rows))
+	for _, r := range rows {
+		out[r.Id] = r.Name
+	}
+	return out, nil
 }
