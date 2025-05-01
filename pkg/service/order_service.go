@@ -84,7 +84,7 @@ func (s *orderService) ListOrders(ctx context.Context, filter dto.OrderListFilte
 	var orders []dto.Order
 	q := s.db.DB.
 		From("orders").
-		Select("id,created_at,updated_at,user_id,address,status").
+		Select("*").
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 

@@ -70,6 +70,7 @@ type ProductList struct {
 	Category     CategoryProduct   `json:"categories"`
 	Discount     float64           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
+	ImageDetail  string            `json:"image_detail"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
 }
