@@ -75,11 +75,12 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 
 func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error) {
 	createCategory := dto.CategoryCreate{
-		Name:        req.Name,
-		Metadata:    req.Metadata,
-		Status:      req.Status,
-		Thumbnail:   req.Thumbnail,
-		Description: req.Description,
+		Name:              req.Name,
+		Metadata:          req.Metadata,
+		Status:            req.Status,
+		Thumbnail:         req.Thumbnail,
+		Description:       req.Description,
+		IsDisplayHomepage: req.IsDisplayHomepage,
 	}
 
 	var parentCategory dto.Category
@@ -190,12 +191,13 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 
 	// Prepare updated fields
 	updateData := map[string]interface{}{
-		"name":        req.Name,
-		"thumbnail":   req.Thumbnail,
-		"status":      req.Status,
-		"metadata":    req.Metadata,
-		"description": req.Description,
-		"updated_at":  time.Now(),
+		"name":                req.Name,
+		"thumbnail":           req.Thumbnail,
+		"status":              req.Status,
+		"metadata":            req.Metadata,
+		"description":         req.Description,
+		"is_display_homepage": req.IsDisplayHomepage,
+		"updated_at":          time.Now(),
 	}
 
 	// Perform the update
@@ -205,22 +207,8 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		log.Errorf("Failed to update category %s: %v", req.Id, err)
 		return nil, fmt.Errorf("failed to update category")
 	}
-	updatedCategory := updateCategory[0]
 
-	// Build response
-	categoryResponse := dto.CategoryResponse{
-		Id:          updatedCategory.Id,
-		Name:        updatedCategory.Name,
-		Thumbnail:   updatedCategory.Thumbnail,
-		Level:       updatedCategory.Level,
-		Description: updatedCategory.Description,
-		Status:      enum.ToStatus(updatedCategory.Status),
-		Metadata:    updatedCategory.Metadata,
-		UpdatedAt:   time.Now(),
-		CreatedAt:   updatedCategory.CreatedAt,
-	}
-
-	return api.Success(categoryResponse), nil
+	return api.Success(updateCategory[0]), nil
 }
 
 func (u *categoryService) DeleteCategory(ctx context.Context, categoryId string) (api.Response, error) {
