@@ -154,6 +154,14 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 		categoryResponses = append(categoryResponses, categoryResponseMap[category.Id])
 	}
 
+	if int(req.Limit) == 0 && int(req.Page) == 0 {
+		return api.Success(categoryResponses), nil
+	}
+
+	if int(req.Limit) >= len(categoryResponses) {
+		return api.Success(categoryResponses), nil
+	}
+
 	if int(req.Limit*(req.Page-1)) > len(categoryResponses) {
 		return api.SuccessPagination(nil, &req.Pagination), nil
 	}
