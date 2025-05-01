@@ -127,7 +127,6 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	}
 
 	// Step 2: Create a map to organize categories by ParentId
-	categoryMap := make(map[string]dto.Category)
 	categoryResponseMap := make(map[string]dto.CategoryListResponse)
 	var topLevelCategories []dto.Category
 
@@ -135,7 +134,6 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 		if category.ParentId == uuid.Nil.String() || category.ParentId == "" {
 			topLevelCategories = append(topLevelCategories, category) // Root categories
 		}
-		categoryMap[category.Id] = category // Group by ParentId
 		categoryResponseMap[category.Id] = buildCategoryResponse(category)
 	}
 
