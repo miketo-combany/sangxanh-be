@@ -83,7 +83,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		IsDisplayHomepage: req.IsDisplayHomepage,
 	}
 
-	var parentCategory dto.Category
+	var parentCategory []dto.Category
 	if req.ParentId != uuid.Nil.String() && req.ParentId != "" {
 		err := u.db.DB.From("categories").
 			Select("*").
@@ -96,7 +96,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		}
 
 		createCategory.ParentId = req.ParentId
-		createCategory.Level = parentCategory.Level + 1 // Set child category level
+		createCategory.Level = parentCategory[0].Level + 1 // Set child category level
 	} else {
 		createCategory.ParentId = ""
 	}
