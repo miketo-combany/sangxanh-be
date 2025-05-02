@@ -49,9 +49,8 @@ func (c *userController) GetById(e echo.Context) error {
 
 // GET /user
 func (c *userController) List(e echo.Context) error {
-	name := e.QueryParam("name")
 	return api.Execute[dto.ListUser](e, func(ctx context.Context, req dto.ListUser) (api.Response, error) {
-		return c.userService.ListUser(ctx, req, name)
+		return c.userService.ListUser(ctx, req)
 	})
 }
 

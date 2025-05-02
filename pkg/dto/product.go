@@ -82,10 +82,11 @@ type CategoryProduct struct {
 
 type ProductFilter struct {
 	query.Pagination
-	CategoryId  string  `json:"category_id"`
-	IsDiscount  bool    `json:"is_discount"`
-	GreaterThan float64 `json:"greater_than"`
-	SmallerThan float64 `json:"smaller_than"`
+	Name        string  `query:"name"`
+	CategoryId  string  `query:"category_id"`
+	IsDiscount  bool    `query:"is_discount"`
+	GreaterThan float64 `query:"greater_than"`
+	SmallerThan float64 `query:"smaller_than"`
 }
 
 type ProductDetail struct {

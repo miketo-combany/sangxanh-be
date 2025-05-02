@@ -16,7 +16,7 @@ import (
 )
 
 type UserService interface {
-	ListUser(ctx context.Context, user dto.ListUser, name string) (api.Response, error)
+	ListUser(ctx context.Context, user dto.ListUser) (api.Response, error)
 	Register(ctx context.Context, req dto.UserRegisterRequest) (api.Response, error)
 	UpdateUser(ctx context.Context, req dto.UserUpdateRequest) (api.Response, error)
 	UpdateUserAddress(ctx context.Context, req dto.UserUpdateAddressRequest) (api.Response, error)
@@ -63,8 +63,9 @@ func (s *userService) GetUserById(ctx context.Context, id string) (api.Response,
 // List + paginate users
 // ---------------------------------------------------------------------
 
-func (s *userService) ListUser(ctx context.Context, filter dto.ListUser, name string) (api.Response, error) {
+func (s *userService) ListUser(ctx context.Context, filter dto.ListUser) (api.Response, error) {
 	// 1. how many records satisfy the filter?
+	name := filter.Name
 	total, err := s.countUsers(ctx, filter, name)
 	if err != nil {
 		return nil, err

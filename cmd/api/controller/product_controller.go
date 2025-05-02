@@ -29,14 +29,12 @@ func (c *productController) Register(g *echo.Group) {
 }
 
 func (c *productController) List(e echo.Context) error {
-	name := e.QueryParam("name")
-
-	// Let api.Execute bind the query params (`page`, `limit`, …) into
-	// dto.ListCategory and run validation tags automatically.
-	return api.Execute[dto.ProductFilter](e, func(ctx context.Context, req dto.ProductFilter) (api.Response, error) {
-		return c.productService.ListProducts(ctx, req, name)
+	return api.Execute[dto.ProductFilter](e, func(
+		ctx context.Context,
+		req dto.ProductFilter, // ← everything is inside req now
+	) (api.Response, error) {
+		return c.productService.ListProducts(ctx, req)
 	})
-
 }
 
 func (c *productController) Create(e echo.Context) error {

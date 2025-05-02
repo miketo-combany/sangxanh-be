@@ -13,7 +13,7 @@ import (
 )
 
 type ProductService interface {
-	ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error)
+	ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error)
 	CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error)
 	UpdateProduct(ctx context.Context, req dto.ProductUpdated) (api.Response, error)
 	DeleteProduct(ctx context.Context, id string) (api.Response, error)
@@ -61,7 +61,7 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 	return len(tmp), nil
 }
 
-func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter, name string) (api.Response, error) {
+func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
 	total, err := s.countProducts(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -74,8 +74,8 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 
-	if name != "" {
-		encoded := url.QueryEscape("%" + name + "%")
+	if filter.Name != "" {
+		encoded := url.QueryEscape("%" + filter.Name + "%")
 		query = query.Like("name", encoded)
 	}
 	if filter.CategoryId != "" {

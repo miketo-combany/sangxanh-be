@@ -61,6 +61,7 @@ type UserUpdateAddressRequest struct {
 
 type ListUser struct {
 	query.Pagination
-	Role   enum.Role   `json:"role"`
-	Status enum.Status `json:"status"`
+	Role   enum.Role   `query:"role"`
+	Status enum.Status `query:"status"`
+	Name   string      `query:"name"`
 }
