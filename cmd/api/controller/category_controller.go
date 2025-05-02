@@ -29,14 +29,8 @@ func (c *categoryController) Register(g *echo.Group) {
 }
 
 func (c *categoryController) List(e echo.Context) error {
-	// Anything that is *not* part of the DTO (here: the free‑text filter "name")
-	// can be taken directly from the query‑string.
-	name := e.QueryParam("name")
-
-	// Let api.Execute bind the query params (`page`, `limit`, …) into
-	// dto.ListCategory and run validation tags automatically.
 	return api.Execute[dto.ListCategory](e, func(ctx context.Context, req dto.ListCategory) (api.Response, error) {
-		return c.categoryService.ListCategories(ctx, req, name)
+		return c.categoryService.ListCategories(ctx, req)
 	})
 }
 

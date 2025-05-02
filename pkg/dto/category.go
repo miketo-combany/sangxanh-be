@@ -71,6 +71,8 @@ type CategoryListResponse struct {
 
 type ListCategory struct {
 	query.Pagination
+	IsDisplayHomepage bool   `query:"is_display_homepage"`
+	Name              string `query:"name"`
 }
 
 func GetResponse(cate *Category) CategoryResponse {

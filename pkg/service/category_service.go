@@ -16,7 +16,7 @@ import (
 
 type CategoryService interface {
 	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
-	ListCategories(ctx context.Context, req dto.ListCategory, name string) (api.Response, error)
+	ListCategories(ctx context.Context, req dto.ListCategory) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
 	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
 	ListCategoryById(ctx context.Context, categoryId string) (api.Response, error)
@@ -112,13 +112,16 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 	return api.Success(categoryResponse), nil
 }
 
-func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCategory, name string) (api.Response, error) {
+func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCategory) (api.Response, error) {
 	// Step 1: Fetch all categories from Supabase
 	var categories []dto.Category
 	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
-	if name != "" {
-		encoded := url.QueryEscape("%" + name + "%")
+	if req.Name != "" {
+		encoded := url.QueryEscape("%" + req.Name + "%")
 		query = query.Like("name", encoded)
+	}
+	if req.IsDisplayHomepage {
+		query = query.Eq("is_display_homepage", "true")
 	}
 	err := query.Execute(&categories)
 	if err != nil {
@@ -151,14 +154,15 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 func buildCategoryResponse(category dto.Category) dto.CategoryListResponse {
 
 	return dto.CategoryListResponse{
-		Id:          category.Id,
-		Name:        category.Name,
-		Thumbnail:   category.Thumbnail,
-		Level:       category.Level,
-		Description: category.Description,
-		ParentId:    category.ParentId,
-		Status:      enum.ToStatus(category.Status),
-		Metadata:    category.Metadata,
+		Id:                category.Id,
+		Name:              category.Name,
+		Thumbnail:         category.Thumbnail,
+		Level:             category.Level,
+		Description:       category.Description,
+		ParentId:          category.ParentId,
+		Status:            enum.ToStatus(category.Status),
+		Metadata:          category.Metadata,
+		IsDisplayHomepage: category.IsDisplayHomepage,
 	}
 }
 
