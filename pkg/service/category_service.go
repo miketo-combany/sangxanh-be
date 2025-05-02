@@ -126,31 +126,7 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 		return nil, err
 	}
 
-	// Step 2: Create a map to organize categories by ParentId
-	categoryResponseMap := make(map[string]dto.CategoryListResponse)
-	var topLevelCategories []dto.Category
-
-	for _, category := range categories {
-		if category.ParentId == uuid.Nil.String() || category.ParentId == "" {
-			topLevelCategories = append(topLevelCategories, category) // Root categories
-		}
-		categoryResponseMap[category.Id] = buildCategoryResponse(category)
-	}
-
-	// Step 3: Convert categories into the response format
-	var categoryResponses []dto.CategoryListResponse
-
-	for _, category := range categoryResponseMap {
-		if category.ParentId != uuid.Nil.String() && category.ParentId != "" {
-			parentCategory := categoryResponseMap[category.ParentId]
-			parentCategory.Categories = append(parentCategory.Categories, category)
-			categoryResponseMap[category.ParentId] = parentCategory
-		}
-	}
-
-	for _, category := range topLevelCategories {
-		categoryResponses = append(categoryResponses, categoryResponseMap[category.Id])
-	}
+	categoryResponses := BuildCategoryTree(categories)
 
 	if int(req.Limit) == 0 && int(req.Page) == 0 {
 		return api.Success(categoryResponses), nil
@@ -251,4 +227,58 @@ func (u *categoryService) DeleteCategory(ctx context.Context, categoryId string)
 
 	log.Infof("Category %s deleted successfully", categoryId)
 	return api.Success("Category deleted successfully"), nil
+}
+
+type node struct {
+	*dto.CategoryListResponse // embedded payload
+	kids                      []*node
+}
+
+func BuildCategoryTree(categories []dto.Category) []dto.CategoryListResponse {
+	var nilID = uuid.Nil.String()
+
+	// ----- Phase 1: id → *node (pointer) ------------------------------------
+
+	nodes := make(map[string]*node)
+
+	for _, c := range categories {
+		payload := buildCategoryResponse(c) // value
+		nodes[c.Id] = &node{
+			CategoryListResponse: &payload, // ← pointer!
+		}
+	}
+
+	// ----- Phase 2: wire children -------------------------------------------
+	var roots []*node
+
+	for _, n := range nodes {
+		pid := n.ParentId
+		if pid == "" || pid == nilID {
+			roots = append(roots, n)
+			continue
+		}
+		if p, ok := nodes[pid]; ok {
+			p.kids = append(p.kids, n) // single instance, no copies
+		}
+	}
+
+	// ----- Phase 3: deep‑clone to DTO values --------------------------------
+	var result []dto.CategoryListResponse
+	for _, r := range roots {
+		result = append(result, clone(r))
+	}
+	return result
+}
+
+// Recursively turn the pointer graph into plain values.
+func clone(n *node) dto.CategoryListResponse {
+	// value copy of the payload
+	out := *n.CategoryListResponse
+
+	// deep‑copy children
+	out.Categories = make([]dto.CategoryListResponse, len(n.kids))
+	for i, k := range n.kids {
+		out.Categories[i] = clone(k)
+	}
+	return out
 }
