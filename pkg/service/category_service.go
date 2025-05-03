@@ -184,6 +184,7 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		"description":         req.Description,
 		"is_display_homepage": req.IsDisplayHomepage,
 		"updated_at":          time.Now(),
+		"parent_id":           req.ParentId,
 	}
 
 	// Perform the update

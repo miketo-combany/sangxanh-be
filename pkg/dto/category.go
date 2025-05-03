@@ -40,6 +40,7 @@ type CategoryUpdate struct {
 	Metadata          []map[string]interface{} `json:"metadata"`
 	Description       string                   `json:"description"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	ParentId          string                   `json:"parent_id,omitempty"`
 }
 
 type CategoryResponse struct {
