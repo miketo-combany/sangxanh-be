@@ -68,6 +68,8 @@ type CategoryListResponse struct {
 	Status            enum.Status              `json:"status"`
 	Metadata          []map[string]interface{} `json:"metadata"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	CreatedAt         time.Time                `json:"created_at"`
+	UpdatedAt         time.Time                `json:"updated_at"`
 }
 
 type ListCategory struct {

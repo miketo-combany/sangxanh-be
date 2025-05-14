@@ -2,9 +2,8 @@ package util
 
 import (
 	"SangXanh/pkg/config"
-	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"time"
 )
 
 var (
@@ -17,41 +16,24 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateAccessToken(userID string, userRole string) (string, error) {
-	claims := CustomClaims{
-		UserID:   userID,
-		UserRole: userRole,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtConfig.Key)
-}
-
-func GenerateRefreshToken(userID string) (string, error) {
-	claims := CustomClaims{
-		UserID: userID,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtConfig.Key)
-}
-
-func ParseToken(tokenStr string) (*CustomClaims, error) {
-	var secret []byte
-
-	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+func VerifyJWT(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Validate the signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		// Return the secret key used to sign the token
+		return []byte(jwtConfig.Key), nil
 	})
-	if err != nil || !token.Valid {
-		return nil, errors.New("invalid token")
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
 	}
-	claims, ok := token.Claims.(*CustomClaims)
-	if !ok {
-		return nil, errors.New("invalid token claims")
+
+	// Check if token is valid
+	if !token.Valid {
+		return nil, fmt.Errorf("token is not valid")
 	}
-	return claims, nil
+
+	return token, nil
 }

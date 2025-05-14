@@ -163,6 +163,8 @@ func buildCategoryResponse(category dto.Category) dto.CategoryListResponse {
 		Status:            enum.ToStatus(category.Status),
 		Metadata:          category.Metadata,
 		IsDisplayHomepage: category.IsDisplayHomepage,
+		CreatedAt:         category.CreatedAt,
+		UpdatedAt:         category.UpdatedAt,
 	}
 }
 
@@ -241,8 +243,6 @@ type node struct {
 
 func BuildCategoryTree(categories []dto.Category) []dto.CategoryListResponse {
 	var nilID = uuid.Nil.String()
-
-	// ----- Phase 1: id → *node (pointer) ------------------------------------
 
 	nodes := make(map[string]*node)
 

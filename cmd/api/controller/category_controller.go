@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
@@ -21,7 +22,7 @@ func NewCategoryController(di do.Injector) (api.Controller, error) {
 
 func (c *categoryController) Register(g *echo.Group) {
 	g = g.Group("/category")
-	g.GET("", c.List)
+	g.GET("", c.List, middleware.AuthenticationMiddleware)
 	g.GET("/:id", c.GetById)
 	g.POST("/create", c.Create)
 	g.PUT("/update", c.Update)
