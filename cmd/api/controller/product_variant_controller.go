@@ -10,11 +10,13 @@ import (
 
 type productVariantController struct {
 	productVariantService service.ProductVariantService
+	authMiddleware        echo.MiddlewareFunc
 }
 
-func NewProductVariantController(di do.Injector) (api.Controller, error) {
+func NewProductVariantController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &productVariantController{
 		productVariantService: do.MustInvoke[service.ProductVariantService](di),
+		authMiddleware:        auth,
 	}, nil
 }
 

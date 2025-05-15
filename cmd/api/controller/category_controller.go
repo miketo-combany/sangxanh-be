@@ -12,21 +12,23 @@ import (
 
 type categoryController struct {
 	categoryService service.CategoryService
+	middleware      echo.MiddlewareFunc
 }
 
-func NewCategoryController(di do.Injector) (api.Controller, error) {
+func NewCategoryController(di do.Injector, middleware echo.MiddlewareFunc) (api.Controller, error) {
 	return &categoryController{
 		categoryService: do.MustInvoke[service.CategoryService](di),
+		middleware:      middleware,
 	}, nil
 }
 
 func (c *categoryController) Register(g *echo.Group) {
 	g = g.Group("/category")
-	g.GET("", c.List, middleware.AuthenticationMiddleware)
+	g.GET("", c.List)
 	g.GET("/:id", c.GetById)
-	g.POST("/create", c.Create)
-	g.PUT("/update", c.Update)
-	g.DELETE("/delete", c.Delete)
+	g.POST("/create", c.Create, c.middleware, middleware.RequireRoles("admin"))
+	g.PUT("/update", c.Update, c.middleware, middleware.RequireRoles("admin"))
+	g.DELETE("/delete", c.Delete, c.middleware, middleware.RequireRoles("admin"))
 }
 
 func (c *categoryController) List(e echo.Context) error {

@@ -6,9 +6,10 @@ import (
 	"github.com/samber/do/v2"
 )
 
-func RegisterAPI(di do.Injector, e *echo.Group) error {
-	type controller func(di do.Injector) (api.Controller, error)
-	controllers := []controller{
+func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc) error {
+	type controllerWithMiddleware func(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error)
+
+	controllers := []controllerWithMiddleware{
 		NewUserController,
 		NewProductController,
 		NewCategoryController,
@@ -17,10 +18,11 @@ func RegisterAPI(di do.Injector, e *echo.Group) error {
 		NewImageController,
 		NewAuthController,
 		NewCartController,
+		NewOrderController,
 	}
 
 	for _, c := range controllers {
-		ctrl, err := c(di)
+		ctrl, err := c(di, auth)
 		if err != nil {
 			return err
 		}

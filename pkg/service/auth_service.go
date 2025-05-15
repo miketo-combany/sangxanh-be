@@ -39,11 +39,13 @@ func (a *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Resp
 	email := req.Email
 	if email == "" {
 		var users []dto.User
-		err := a.db.DB.From("users").Select("email").Eq("username", req.Username).Execute(&users)
+		err := a.db.DB.From("users").Select("*").Eq("username", req.Username).Execute(&users)
 		if err != nil || len(users) == 0 {
-			return nil, fmt.Errorf("user not found")
+			return nil, fmt.Errorf("user not found: %v", err)
 		}
+		log.Info(users[0].Username)
 		email = users[0].Email
+		log.Info(email)
 	}
 
 	session, err := a.db.Auth.SignIn(ctx, supabase.UserCredentials{

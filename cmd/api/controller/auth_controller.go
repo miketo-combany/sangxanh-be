@@ -11,7 +11,7 @@ type authController struct {
 	authService service.AuthService
 }
 
-func NewAuthController(di do.Injector) (api.Controller, error) {
+func NewAuthController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &authController{
 		authService: do.MustInvoke[service.AuthService](di),
 	}, nil

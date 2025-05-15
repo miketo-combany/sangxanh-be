@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
@@ -11,20 +12,22 @@ import (
 
 type productController struct {
 	productService service.ProductService
+	authMiddleware echo.MiddlewareFunc
 }
 
-func NewProductController(di do.Injector) (api.Controller, error) {
+func NewProductController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &productController{
 		productService: do.MustInvoke[service.ProductService](di),
+		authMiddleware: auth,
 	}, nil
 }
 
 func (c *productController) Register(g *echo.Group) {
 	g = g.Group("/product")
 	g.GET("", c.List)
-	g.POST("/create", c.Create)
-	g.PUT("/update", c.Update)
-	g.DELETE("/delete", c.Delete)
+	g.POST("/create", c.Create, c.authMiddleware, middleware.RequireRoles("admin"))
+	g.PUT("/update", c.Update, c.authMiddleware, middleware.RequireRoles("admin"))
+	g.DELETE("/delete", c.Delete, c.authMiddleware, middleware.RequireRoles("admin"))
 	g.GET("/:id", c.GetById)
 }
 

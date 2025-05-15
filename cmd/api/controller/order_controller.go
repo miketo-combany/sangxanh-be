@@ -11,12 +11,14 @@ import (
 )
 
 type orderController struct {
-	orderService service.OrderService
+	orderService   service.OrderService
+	authMiddleware echo.MiddlewareFunc
 }
 
-func NewOrderController(di do.Injector) (api.Controller, error) {
+func NewOrderController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &orderController{
-		orderService: do.MustInvoke[service.OrderService](di),
+		orderService:   do.MustInvoke[service.OrderService](di),
+		authMiddleware: auth,
 	}, nil
 }
 

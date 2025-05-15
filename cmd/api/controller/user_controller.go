@@ -15,12 +15,14 @@ import (
 // --------------------------------------------------------------------
 
 type userController struct {
-	userService service.UserService
+	userService    service.UserService
+	authMiddleware echo.MiddlewareFunc
 }
 
-func NewUserController(di do.Injector) (api.Controller, error) {
+func NewUserController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &userController{
-		userService: do.MustInvoke[service.UserService](di),
+		userService:    do.MustInvoke[service.UserService](di),
+		authMiddleware: auth,
 	}, nil
 }
 

@@ -10,11 +10,13 @@ import (
 
 type productOptionController struct {
 	productOption service.ProductOptionService
+	auth          echo.MiddlewareFunc
 }
 
-func NewProductOptionController(di do.Injector) (api.Controller, error) {
+func NewProductOptionController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &productOptionController{
 		productOption: do.MustInvoke[service.ProductOptionService](di),
+		auth:          auth,
 	}, nil
 }
 

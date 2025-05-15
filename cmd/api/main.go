@@ -2,6 +2,7 @@ package main
 
 import (
 	"SangXanh/cmd/api/controller"
+	middleware1 "SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/config"
 	"SangXanh/pkg/connection"
 	"SangXanh/pkg/log"
@@ -25,8 +26,11 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(log.Middleware())
 
+	jwtConf := do.MustInvoke[config.JWTKey](di)
+	authMiddleware := middleware1.AuthenticationMiddleware(jwtConf.Key)
+
 	api := e.Group("/api")
-	if err := controller.RegisterAPI(di, api); err != nil {
+	if err := controller.RegisterAPI(di, api, authMiddleware); err != nil {
 		panic(err)
 	}
 

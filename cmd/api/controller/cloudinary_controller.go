@@ -15,7 +15,7 @@ type imageController struct {
 	imageSvc service.ImageService
 }
 
-func NewImageController(di do.Injector) (api.Controller, error) {
+func NewImageController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &imageController{
 		imageSvc: do.MustInvoke[service.ImageService](di),
 	}, nil

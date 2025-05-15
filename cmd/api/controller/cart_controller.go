@@ -9,12 +9,14 @@ import (
 )
 
 type cartController struct {
-	cartService service.CartService
+	cartService    service.CartService
+	authMiddleware echo.MiddlewareFunc
 }
 
-func NewCartController(di do.Injector) (api.Controller, error) {
+func NewCartController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error) {
 	return &cartController{
-		cartService: do.MustInvoke[service.CartService](di),
+		cartService:    do.MustInvoke[service.CartService](di),
+		authMiddleware: auth,
 	}, nil
 }
 
