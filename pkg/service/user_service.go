@@ -12,7 +12,6 @@ import (
 
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
@@ -149,14 +148,8 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 		return nil, fmt.Errorf("username already exists")
 	}
 
-	// Hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Errorf("failed to hash password: %v", err)
-		return nil, fmt.Errorf(err.Error())
-	}
-
 	userData := dto.UserRegisterData{
+		FullName:     req.FullName,
 		Username:     req.Username,
 		Role:         enum.User,
 		BasicAddress: req.BasicAddress,
@@ -167,7 +160,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 
 	user := supabase.UserCredentials{
 		Email:    req.Email,
-		Password: string(hashedPassword),
+		Password: req.Password,
 		Data:     userData,
 	}
 
@@ -198,6 +191,7 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest)
 
 	updateData := map[string]interface{}{
 		"username":      req.Username,
+		"full_name":     req.FullName,
 		"email":         req.Email,
 		"avatar":        req.Avatar,
 		"phone":         req.Phone,

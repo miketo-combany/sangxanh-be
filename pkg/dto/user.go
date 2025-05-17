@@ -12,6 +12,7 @@ type User struct {
 	Role         enum.Role         `json:"role"`
 	Address      []Address         `json:"address"`
 	BasicAddress string            `json:"basic_address"`
+	FullName     string            `json:"full_name"`
 	Avatar       string            `json:"avatar"`
 	Phone        string            `json:"phone"`
 	Email        string            `json:"email"`
@@ -33,6 +34,7 @@ type UserRegisterRequest struct {
 	Avatar       string            `json:"avatar"`
 	BasicAddress string            `json:"basic_address"`
 	Metadata     map[string]string `json:"metadata"`
+	FullName     string            `json:"full_name"`
 }
 
 type UserRegisterData struct {
@@ -42,6 +44,7 @@ type UserRegisterData struct {
 	Avatar       string            `json:"avatar"`
 	BasicAddress string            `json:"basic_address"`
 	Metadata     map[string]string `json:"metadata"`
+	FullName     string            `json:"full_name"`
 }
 
 type UserUpdateRequest struct {
@@ -51,6 +54,7 @@ type UserUpdateRequest struct {
 	Avatar       string            `json:"avatar"`
 	Phone        string            `json:"phone"`
 	BasicAddress string            `json:"basic_address"`
+	FullName     string            `json:"full_name"`
 	Metadata     map[string]string `json:"metadata"`
 }
 
