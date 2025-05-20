@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SangXanh/pkg/common/api"
+	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
 	"context"
 	"github.com/labstack/echo/v4"
@@ -36,7 +37,10 @@ func (c *cartController) List(e echo.Context) error {
 }
 
 func (c *cartController) Create(e echo.Context) error {
-	return api.Execute(e, c.cartService.CreateCart)
+	userID := e.Get("user_id").(string) // Get user ID from the access token
+	return api.Execute(e, func(ctx context.Context, req dto.CartCreateRequest) (api.Response, error) {
+		return c.cartService.CreateCart(ctx, req, userID)
+	})
 }
 
 func (c *cartController) Update(e echo.Context) error {

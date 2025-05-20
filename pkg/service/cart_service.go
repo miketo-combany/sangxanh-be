@@ -11,7 +11,7 @@ import (
 )
 
 type CartService interface {
-	CreateCart(ctx context.Context, req dto.CartCreateRequest) (api.Response, error)
+	CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error)
 	GetCartsByUserID(ctx context.Context, userID string) (api.Response, error)
 	UpdateCart(ctx context.Context, req dto.CartUpdate) (api.Response, error)
 	DeleteCart(ctx context.Context, id string) (api.Response, error)
@@ -29,7 +29,7 @@ func NewCartService(di do.Injector) (CartService, error) {
 	return &cartService{db: db}, nil
 }
 
-func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest) (api.Response, error) {
+func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error) {
 	var created []dto.Cart
 
 	if err := s.db.DB.
