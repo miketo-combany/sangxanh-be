@@ -22,14 +22,14 @@ func NewCartController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller
 
 func (c *cartController) Register(g *echo.Group) {
 	g = g.Group("/cart")
-	g.GET("", c.List)             // List all carts for the current user
-	g.POST("/create", c.Create)   // Create a new cart
-	g.PUT("/update", c.Update)    // Update cart quantity
-	g.DELETE("/delete", c.Delete) // Delete a cart
+	g.GET("", c.List, c.authMiddleware)             // List all carts for the current user
+	g.POST("/create", c.Create, c.authMiddleware)   // Create a new cart
+	g.PUT("/update", c.Update, c.authMiddleware)    // Update cart quantity
+	g.DELETE("/delete", c.Delete, c.authMiddleware) // Delete a cart
 }
 
 func (c *cartController) List(e echo.Context) error {
-	userID := e.Get("userID").(string) // Get user ID from the access token
+	userID := e.Get("user_id").(string) // Get user ID from the access token
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.cartService.GetCartsByUserID(ctx, userID)
 	})
