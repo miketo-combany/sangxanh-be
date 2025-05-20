@@ -25,8 +25,7 @@ jobs:
 
       - name: Deploy to GCP VM
         run: |
-          ssh ${{ secrets.ssh_user }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /path/to/your/app
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             git pull origin main
             docker compose down
             docker compose up -d --build
