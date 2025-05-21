@@ -13,7 +13,7 @@ import (
 type CartService interface {
 	CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error)
 	GetCartsByUserID(ctx context.Context, userID string) (api.Response, error)
-	UpdateCart(ctx context.Context, req dto.CartUpdate) (api.Response, error)
+	UpdateCart(ctx context.Context, req dto.CartUpdate, userID string) (api.Response, error)
 	DeleteCart(ctx context.Context, id string) (api.Response, error)
 }
 
@@ -31,12 +31,21 @@ func NewCartService(di do.Injector) (CartService, error) {
 
 func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error) {
 	var created []dto.Cart
+	req.UserID = userID
 
 	if err := s.db.DB.
 		From("carts").
 		Insert(req).
 		Execute(&created); err != nil {
 		return nil, fmt.Errorf("failed to create cart: %w", err)
+	}
+	if err := s.db.DB.
+		From("product_options").
+		Select("id,name,price,detail,created_at,updated_at").
+		Eq("id", req.ProductOptionID).
+		IsNull("deleted_at").
+		Execute(nil); err != nil {
+		return nil, fmt.Errorf("failed to fetch product option for cart %s: %w", req.ProductOptionID, err)
 	}
 	// Return the created cart
 	return api.Success(created[0]), nil
@@ -47,7 +56,7 @@ func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.
 	var carts []dto.Cart
 	if err := s.db.DB.
 		From("carts").
-		Select("id, user_id, product_option_id, quantity, created_at, updated_at").
+		Select("id,user_id,product_option_id,quantity,created_at,updated_at").
 		Eq("user_id", userID).
 		IsNull("deleted_at").
 		Execute(&carts); err != nil {
@@ -57,10 +66,10 @@ func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.
 	// Now query the product_options table to get ProductOption data for each cart
 	var cartResponses []dto.CartResponse
 	for _, cart := range carts {
-		var productOption dto.ProductOption
+		var productOption []dto.ProductOption
 		if err := s.db.DB.
 			From("product_options").
-			Select("id, name, price, detail, created_at, updated_at").
+			Select("id,name,price,detail,created_at,updated_at").
 			Eq("id", cart.ProductOptionID).
 			IsNull("deleted_at").
 			Execute(&productOption); err != nil {
@@ -70,7 +79,7 @@ func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.
 		// Combine cart and product option in CartResponse
 		cartResponse := dto.CartResponse{
 			Cart:          cart,
-			ProductOption: productOption,
+			ProductOption: productOption[0],
 		}
 		cartResponses = append(cartResponses, cartResponse)
 	}
@@ -79,7 +88,7 @@ func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.
 	return api.Success(cartResponses), nil
 }
 
-func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate) (api.Response, error) {
+func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate, userID string) (api.Response, error) {
 	updateData := map[string]interface{}{
 		"quantity":   req.Quantity,
 		"updated_at": time.Now(),
@@ -90,15 +99,16 @@ func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate) (api.R
 		From("carts").
 		Update(updateData).
 		Eq("id", req.ID).
+		Eq("user_id", userID).
 		Execute(&updated); err != nil {
 		return nil, fmt.Errorf("failed to update cart: %w", err)
 	}
 
 	// Fetch the updated cart and return with ProductOption
-	var productOption dto.ProductOption
+	var productOption []dto.ProductOption
 	if err := s.db.DB.
 		From("product_options").
-		Select("id, name, price, detail, created_at, updated_at").
+		Select("id,name,price,detail,created_at,updated_at").
 		Eq("id", updated[0].ProductOptionID).
 		IsNull("deleted_at").
 		Execute(&productOption); err != nil {
@@ -107,7 +117,7 @@ func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate) (api.R
 
 	cartResponse := dto.CartResponse{
 		Cart:          updated[0],
-		ProductOption: productOption,
+		ProductOption: productOption[0],
 	}
 
 	return api.Success(cartResponse), nil

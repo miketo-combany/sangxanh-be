@@ -44,7 +44,10 @@ func (c *cartController) Create(e echo.Context) error {
 }
 
 func (c *cartController) Update(e echo.Context) error {
-	return api.Execute(e, c.cartService.UpdateCart)
+	userID := e.Get("user_id").(string)
+	return api.Execute(e, func(ctx context.Context, req dto.CartUpdate) (api.Response, error) {
+		return c.cartService.UpdateCart(ctx, req, userID)
+	})
 }
 
 func (c *cartController) Delete(e echo.Context) error {
