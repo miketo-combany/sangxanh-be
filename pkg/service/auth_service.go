@@ -6,11 +6,8 @@ import (
 	"SangXanh/pkg/log"
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
-	"net/http"
-	"strings"
 )
 
 type AuthService interface {
@@ -81,19 +78,4 @@ func (a *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) 
 	}
 
 	return api.Success(resp), nil
-}
-func (a *authService) GetUserInfo(ctx context.Context) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			return echo.ErrUnauthorized
-		}
-
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		user, err := a.db.Auth.User(ctx, tokenString)
-		if err != nil {
-			return echo.ErrUnauthorized
-		}
-		return c.JSON(http.StatusOK, user)
-	}
 }
