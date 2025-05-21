@@ -26,7 +26,7 @@ jobs:
       - name: Deploy to GCP VM
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd ~/dev
+          cd ~/dev/sangxanh-be
             git pull origin main
             docker compose down
             docker compose up -d --build
