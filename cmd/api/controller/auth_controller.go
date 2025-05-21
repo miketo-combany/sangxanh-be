@@ -38,6 +38,6 @@ func (c *authController) Refresh(e echo.Context) error {
 
 func (c *authController) CurrentUser(e echo.Context) error {
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return middleware.GetCurrentUser(e), nil
+		return middleware.GetCurrentUser(e)
 	})
 }
