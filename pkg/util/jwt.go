@@ -22,9 +22,7 @@ var (
 )
 
 func VerifyJWT(tokenString, jwtKey string) (*jwt.Token, error) {
-	claims := &CustomClaims{}
-
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Only accept HMAC
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrBadAlg
