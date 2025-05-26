@@ -37,9 +37,23 @@ func NewOrderService(di do.Injector) (OrderService, error) {
    ------------------------------------------------------------------*/
 
 func (s *orderService) countOrders(ctx context.Context, filter dto.OrderListFilter) (int, error) {
-	q := s.db.DB.From("orders").Select("id").IsNull("deleted_at")
+	userId := ctx.Value("user_id")
+	userRole := ctx.Value("user_role")
+	q := s.db.DB.
+		From("orders").
+		Select("*").
+		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
+		IsNull("deleted_at")
+
 	if filter.Status != "" {
 		q = q.Eq("status", string(filter.Status))
+	}
+	if userRole == enum.Admin && filter.UserId != "" {
+		q = q.Eq("user_id", filter.UserId)
+	}
+
+	if userRole == enum.User || (userRole == enum.Admin && filter.UserId == "") {
+		q = q.Eq("user_id", userId.(string))
 	}
 
 	var tmp []struct{}
@@ -80,7 +94,8 @@ func (s *orderService) ListOrders(ctx context.Context, filter dto.OrderListFilte
 	if err != nil {
 		return nil, err
 	}
-
+	userId := ctx.Value("user_id")
+	userRole := ctx.Value("user_role")
 	var orders []dto.Order
 	q := s.db.DB.
 		From("orders").
@@ -90,6 +105,13 @@ func (s *orderService) ListOrders(ctx context.Context, filter dto.OrderListFilte
 
 	if filter.Status != "" {
 		q = q.Eq("status", string(filter.Status))
+	}
+	if userRole == enum.Admin && filter.UserId != "" {
+		q = q.Eq("user_id", filter.UserId)
+	}
+
+	if userRole == enum.User || (userRole == enum.Admin && filter.UserId == "") {
+		q = q.Eq("user_id", userId.(string))
 	}
 
 	if err := q.Execute(&orders); err != nil {
@@ -151,11 +173,12 @@ func (s *orderService) CreateOrder(ctx context.Context, req dto.OrderCreate) (ap
 		return nil, err
 	}
 
+	userId := ctx.Value("user_id")
 	// 2) insert into orders --------------------------------------------------
 	orderBody := map[string]interface{}{
-		"user_id":  req.UserId,
+		"user_id":  userId.(string),
 		"address":  req.Address,
-		"status":   req.Status,
+		"status":   enum.Pending,
 		"metadata": req.Metadata,
 	}
 	var createdOrders []dto.Order
@@ -191,14 +214,6 @@ func (s *orderService) CreateOrder(ctx context.Context, req dto.OrderCreate) (ap
    ------------------------------------------------------------------*/
 
 func (s *orderService) UpdateOrder(ctx context.Context, req dto.OrderUpdate) (api.Response, error) {
-	// 1) validate status
-	if req.Status != enum.Pending &&
-		req.Status != enum.Complete &&
-		req.Status != enum.Cancelled {
-		return nil, fmt.Errorf("invalid status")
-	}
-
-	// 2) validate options
 	var optionIds []string
 	for _, od := range req.OrderDetails {
 		optionIds = append(optionIds, od.ProductOptionId)
@@ -207,11 +222,11 @@ func (s *orderService) UpdateOrder(ctx context.Context, req dto.OrderUpdate) (ap
 		return nil, err
 	}
 
+	userId := ctx.Value("user_id")
 	// 3) update order
 	updateBody := map[string]interface{}{
-		"user_id":    req.UserId,
+		"user_id":    userId.(string),
 		"address":    req.Address,
-		"status":     req.Status,
 		"metadata":   req.Metadata,
 		"updated_at": time.Now(),
 	}
@@ -285,15 +300,15 @@ func (s *orderService) UpdateOrderStatus(ctx context.Context, id string, status 
 		"status":     status,
 		"updated_at": time.Now(),
 	}
-
+	var order []dto.Order
 	if err := s.db.DB.
 		From("orders").
 		Update(updateBody).
 		Eq("id", id).
 		IsNull("deleted_at").
-		Execute(nil); err != nil {
+		Execute(order); err != nil {
 		return nil, fmt.Errorf("failed to update order status: %v", err)
 	}
 
-	return api.Success("Order status updated successfully"), nil
+	return api.Success(order[0]), nil
 }

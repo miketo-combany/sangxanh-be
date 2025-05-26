@@ -24,13 +24,12 @@ func NewOrderController(di do.Injector, auth echo.MiddlewareFunc) (api.Controlle
 
 func (c *orderController) Register(g *echo.Group) {
 	g = g.Group("/order")
-	g.GET("", c.List)
+	g.GET("", c.List, c.authMiddleware)
 	g.GET("/:id", c.GetById)
-	g.POST("/create", c.Create)
-	g.PUT("/update", c.Update)
-	g.DELETE("/delete", c.Delete)
-	g.PUT("/update-status", c.UpdateStatus)
-
+	g.POST("/create", c.Create, c.authMiddleware)
+	g.PUT("/update", c.Update, c.authMiddleware)
+	g.DELETE("/delete", c.Delete, c.authMiddleware)
+	g.PUT("/update-status", c.UpdateStatus, c.authMiddleware)
 }
 
 func (c *orderController) List(e echo.Context) error {

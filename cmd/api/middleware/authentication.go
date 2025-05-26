@@ -3,6 +3,7 @@ package middleware
 import (
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/util"
+	"context"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -22,11 +23,15 @@ func AuthenticationMiddleware(jwtKey string) echo.MiddlewareFunc {
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 			}
-			// Parse custom claims and store in context if needed
+
+			// Extract claims
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				c.Set("user_id", claims["sub"])
-				c.Set("user_role", claims["user_role"])
-				c.Set("exp", claims["exp"])
+				ctx := c.Request().Context()
+				ctx = context.WithValue(ctx, "user_id", claims["sub"])
+				ctx = context.WithValue(ctx, "user_role", claims["user_role"])
+
+				// Replace request context
+				c.SetRequest(c.Request().WithContext(ctx))
 			}
 
 			return next(c)
@@ -35,12 +40,14 @@ func AuthenticationMiddleware(jwtKey string) echo.MiddlewareFunc {
 }
 
 func GetCurrentUser(c echo.Context) (api.Response, error) {
-	userID, ok := c.Get("user_id").(string)
+	ctx := c.Request().Context()
+
+	userID, ok := ctx.Value("user_id").(string)
 	if !ok || userID == "" {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User ID not found in context")
 	}
 
-	userRole, ok := c.Get("user_role").(string)
+	userRole, ok := ctx.Value("user_role").(string)
 	if !ok || userRole == "" {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User role not found in context")
 	}
