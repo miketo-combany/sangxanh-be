@@ -10,7 +10,8 @@ import (
 func RequireRoles(allowedRoles ...string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			role, ok := c.Get("user_role").(string)
+			ctx := c.Request().Context()
+			role, ok := ctx.Value("user_role").(string)
 			if !ok || role == "" {
 				return echo.NewHTTPError(http.StatusForbidden, "Missing user role")
 			}
