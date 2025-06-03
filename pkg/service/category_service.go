@@ -11,6 +11,7 @@ import (
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
 	"net/url"
+	"sort"
 	"time"
 )
 
@@ -115,7 +116,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCategory) (api.Response, error) {
 	// Step 1: Fetch all categories from Supabase
 	var categories []dto.Category
-	query := u.db.DB.From("categories").Select("*").IsNull("deleted_at")
+	query := u.db.DB.From("categories").Select("*").OrderBy("created_at", "asc").IsNull("deleted_at")
 	if req.Name != "" {
 		encoded := url.QueryEscape("%" + req.Name + "%")
 		query = query.Like("name", encoded)
@@ -266,6 +267,10 @@ func BuildCategoryTree(categories []dto.Category) []dto.CategoryListResponse {
 			p.kids = append(p.kids, n) // single instance, no copies
 		}
 	}
+
+	sort.SliceStable(roots, func(i, j int) bool {
+		return roots[i].CreatedAt.After(roots[j].CreatedAt)
+	})
 
 	// ----- Phase 3: deep‑clone to DTO values --------------------------------
 	var result []dto.CategoryListResponse
