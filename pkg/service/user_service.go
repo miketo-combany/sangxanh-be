@@ -170,7 +170,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 		return nil, fmt.Errorf(err.Error())
 	}
 
-	return api.Success("User registered successfully"), nil
+	return api.Success(user), nil
 }
 
 func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest) (api.Response, error) {
@@ -207,7 +207,7 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest)
 		return nil, fmt.Errorf("update failed")
 	}
 
-	return api.Success("User profile updated successfully"), nil
+	return api.Success(updated[0]), nil
 }
 
 func (s *userService) UpdateUserAddress(ctx context.Context, req dto.UserUpdateAddressRequest) (api.Response, error) {

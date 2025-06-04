@@ -130,6 +130,10 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 		return nil, err
 	}
 
+	if req.IsDisplayHomepage {
+		return api.Success(categories), nil
+	}
+
 	categoryResponses := BuildCategoryTree(categories)
 
 	if int(req.Limit) == 0 && int(req.Page) == 0 {
