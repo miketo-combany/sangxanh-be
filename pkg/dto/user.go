@@ -19,6 +19,18 @@ type User struct {
 	Metadata     map[string]string `json:"metadata"`
 }
 
+type UserInfo struct {
+	Id           string    `json:"id"`
+	Username     string    `json:"username"`
+	Role         enum.Role `json:"role"`
+	Address      []Address `json:"address"`
+	BasicAddress string    `json:"basic_address"`
+	FullName     string    `json:"full_name"`
+	Avatar       string    `json:"avatar"`
+	Phone        string    `json:"phone"`
+	Email        string    `json:"email"`
+}
+
 type Address struct {
 	Name             string `json:"name"`
 	Phone            string `json:"phone"`

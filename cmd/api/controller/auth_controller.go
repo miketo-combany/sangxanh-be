@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/service"
 	"context"
@@ -38,6 +37,6 @@ func (c *authController) Refresh(e echo.Context) error {
 
 func (c *authController) CurrentUser(e echo.Context) error {
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return middleware.GetCurrentUser(e)
+		return c.authService.GetCurrentUser(ctx)
 	})
 }

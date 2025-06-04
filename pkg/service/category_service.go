@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
+	"github.com/samber/lo"
 	"net/url"
 	"sort"
 	"time"
@@ -182,7 +183,6 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		return nil, fmt.Errorf("category not found")
 	}
 
-	// Prepare updated fields
 	updateData := map[string]interface{}{
 		"name":                req.Name,
 		"thumbnail":           req.Thumbnail,
@@ -191,7 +191,20 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		"description":         req.Description,
 		"is_display_homepage": req.IsDisplayHomepage,
 		"updated_at":          time.Now(),
-		"parent_id":           req.ParentId,
+	}
+
+	if req.ParentId != uuid.Nil.String() && req.ParentId != "" {
+		// Prepare updated fields
+		updateData = map[string]interface{}{
+			"name":                req.Name,
+			"thumbnail":           req.Thumbnail,
+			"status":              req.Status,
+			"metadata":            req.Metadata,
+			"description":         req.Description,
+			"is_display_homepage": req.IsDisplayHomepage,
+			"updated_at":          time.Now(),
+			"parent_id":           req.ParentId,
+		}
 	}
 
 	// Perform the update
@@ -248,10 +261,12 @@ type node struct {
 
 func BuildCategoryTree(categories []dto.Category) []dto.CategoryListResponse {
 	var nilID = uuid.Nil.String()
+	var cateIds []string
 
 	nodes := make(map[string]*node)
 
 	for _, c := range categories {
+		cateIds = append(cateIds, c.Id)
 		payload := buildCategoryResponse(c) // value
 		nodes[c.Id] = &node{
 			CategoryListResponse: &payload, // ← pointer!
@@ -263,7 +278,7 @@ func BuildCategoryTree(categories []dto.Category) []dto.CategoryListResponse {
 
 	for _, n := range nodes {
 		pid := n.ParentId
-		if pid == "" || pid == nilID {
+		if pid == "" || pid == nilID || !lo.Contains(cateIds, pid) {
 			roots = append(roots, n)
 			continue
 		}

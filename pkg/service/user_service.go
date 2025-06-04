@@ -39,7 +39,7 @@ func (s *userService) GetUserById(ctx context.Context, id string) (api.Response,
 		return nil, fmt.Errorf("user ID is required")
 	}
 
-	var users []dto.User
+	var users []dto.UserInfo
 	err := s.db.DB.
 		From("users").
 		Select("*").
