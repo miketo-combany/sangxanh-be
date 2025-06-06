@@ -38,6 +38,11 @@ type Address struct {
 	IsDefaultAddress bool   `json:"is_default_address"`
 }
 
+type ChangePassword struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
 type UserRegisterRequest struct {
 	Username     string            `json:"username"`
 	Password     string            `json:"password"`

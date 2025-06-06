@@ -27,6 +27,7 @@ func AuthenticationMiddleware(jwtKey string) echo.MiddlewareFunc {
 			// Extract claims
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
 				ctx := c.Request().Context()
+				ctx = context.WithValue(ctx, "token", tokenString)
 				ctx = context.WithValue(ctx, "user_id", claims["sub"])
 				ctx = context.WithValue(ctx, "user_role", claims["user_role"])
 

@@ -35,8 +35,9 @@ func (c *userController) Register(g *echo.Group) {
 
 	g.GET("", c.List)
 	g.POST("/register", c.Create)
-	g.PUT("/update", c.Update)
-	g.PUT("/address", c.Address)
+	g.PUT("/update", c.Update, c.authMiddleware)
+	g.PUT("/address", c.Address, c.authMiddleware)
+	g.PUT("/change-password", c.ChangePassword, c.authMiddleware)
 
 	g.GET("/:id", c.GetById) // ← NEW
 }
@@ -69,4 +70,8 @@ func (c *userController) Update(e echo.Context) error {
 // PATCH /user/address
 func (c *userController) Address(e echo.Context) error {
 	return api.Execute(e, c.userService.UpdateUserAddress)
+}
+
+func (c *userController) ChangePassword(e echo.Context) error {
+	return api.Execute(e, c.userService.ChangePassword)
 }
