@@ -56,7 +56,8 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 	}
 	cat := categories[0]
 	var childCategories []dto.Category
-	err = u.db.DB.From("categories").Select("*").Eq("parent_id", categoryId).Execute(&childCategories)
+	err = u.db.DB.From("categories").Select("*").Eq("parent_id", categoryId).IsNull("deleted_at").Execute(&childCategories)
+	log.Info("category", categoryId, "childCategories", childCategories)
 
 	// 2. Build the response payload (same fields you return elsewhere)
 	categoryResponse := dto.CategoryResponse{
@@ -247,7 +248,7 @@ func (u *categoryService) DeleteCategory(ctx context.Context, categoryId string)
 
 	// Check if the category has child categories
 	var childCategories []dto.Category
-	err = u.db.DB.From("categories").Select("id").Eq("parent_id", categoryId).Execute(&childCategories)
+	err = u.db.DB.From("categories").Select("id").Eq("parent_id", categoryId).IsNull("deleted_at").Execute(&childCategories)
 	if err != nil {
 		log.Errorf("Failed to check child categories for %s: %v", categoryId, err)
 		return nil, fmt.Errorf("failed to verify child categories")

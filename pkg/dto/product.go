@@ -16,6 +16,8 @@ type Product struct {
 	CategoryId   string              `json:"category_id"`
 	Discount     float32             `json:"discount"`
 	DiscountType enum.DiscountType   `json:"discount_type"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
 	Metadata     []map[string]string `json:"metadata"`
 	CreatedAt    time.Time           `json:"created_at"`
 	UpdatedAt    time.Time           `json:"updated_at"`
@@ -31,6 +33,8 @@ type ProductCreated struct {
 	CategoryId   string              `json:"category_id"`
 	Discount     float32             `json:"discount"`
 	DiscountType enum.DiscountType   `json:"discount_type"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
 	Metadata     []map[string]string `json:"metadata"`
 }
 
@@ -39,6 +43,8 @@ type ProductUpdated struct {
 	Name         string              `json:"name"`
 	Price        float32             `json:"price"`
 	Content      string              `json:"content"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
 	ImageDetail  string              `json:"image_detail"`
 	Thumbnail    string              `json:"thumbnail"`
 	CategoryId   string              `json:"category_id"`
@@ -54,6 +60,8 @@ type ProductResponse struct {
 	Content      string            `json:"content"`
 	ImageDetail  string            `json:"image_detail"`
 	Thumbnail    string            `json:"thumbnail"`
+	ProductCode  string            `json:"product_code"`
+	Description  string            `json:"description"`
 	Discount     float32           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
 	CategoryId   string            `json:"category_id"`
@@ -95,6 +103,8 @@ type ProductDetail struct {
 	Name            string                  `json:"name"`
 	Price           float32                 `json:"price"`
 	Content         string                  `json:"content"`
+	ProductCode     string                  `json:"product_code"`
+	Description     string                  `json:"description"`
 	ImageDetail     string                  `json:"image_detail"`
 	Thumbnail       string                  `json:"thumbnail"`
 	DiscountType    enum.DiscountType       `json:"discount_type"`

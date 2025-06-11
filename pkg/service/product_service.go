@@ -111,6 +111,8 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		Discount:     req.Discount,
 		DiscountType: req.DiscountType,
 		Metadata:     req.Metadata,
+		Description:  req.Description,
+		ProductCode:  req.ProductCode,
 	}
 
 	err := s.validCategory(req.CategoryId)
@@ -132,6 +134,8 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 		"thumbnail":     req.Thumbnail,
 		"category_id":   req.CategoryId,
 		"discount":      req.Discount,
+		"description":   req.Description,
+		"product_code":  req.ProductCode,
 		"discount_type": req.DiscountType,
 		"metadata":      req.Metadata,
 		"updated_at":    time.Now(),
@@ -184,7 +188,7 @@ func (s *productService) GetProductById(
 	var rows []dto.ProductDetail
 	if err := s.db.DB.
 		From("products").
-		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select("id,name,price,content,image_detail,description, product_code, category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		Eq("id", id).
 		IsNull("deleted_at").
 		Execute(&rows); err != nil {

@@ -275,7 +275,15 @@ func (s *userService) ChangePassword(ctx context.Context, req dto.ChangePassword
 		log.Errorf("failed to update user: %v", err)
 		return nil, err
 	}
-	err = s.db.DB.From("users").Update(updateData).Eq("id", userID).Execute(nil)
+	password, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 10)
+	if err != nil {
+		return nil, err
+	}
+	updateUser := map[string]interface{}{
+		"password":   string(password),
+		"updated_at": time.Now(),
+	}
+	err = s.db.DB.From("users").Update(updateUser).Eq("id", userID).Execute(nil)
 	if err != nil {
 		log.Errorf("failed to update user: %v", err)
 		return nil, err
