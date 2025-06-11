@@ -19,6 +19,7 @@ type Category struct {
 	DeletedAt         time.Time                `json:"deleted_at"`
 	Description       string                   `json:"description"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	IsDisplayHeader   bool                     `json:"is_display_header"`
 }
 
 type CategoryCreate struct {
@@ -30,6 +31,7 @@ type CategoryCreate struct {
 	Description       string                   `json:"description"`
 	Level             int                      `json:"level"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	IsDisplayHeader   bool                     `json:"is_display_header"`
 }
 
 type CategoryUpdate struct {
@@ -41,6 +43,7 @@ type CategoryUpdate struct {
 	Description       string                   `json:"description"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	ParentId          string                   `json:"parent_id,omitempty"`
+	IsDisplayHeader   bool                     `json:"is_display_header"`
 }
 
 type CategoryResponse struct {
@@ -55,6 +58,7 @@ type CategoryResponse struct {
 	Status            enum.Status              `json:"status"`
 	Metadata          []map[string]interface{} `json:"metadata"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	IsDisplayHeader   bool                     `json:"is_display_header"`
 }
 
 type CategoryListResponse struct {
@@ -68,6 +72,7 @@ type CategoryListResponse struct {
 	Status            enum.Status              `json:"status"`
 	Metadata          []map[string]interface{} `json:"metadata"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
+	IsDisplayHeader   bool                     `json:"is_display_header"`
 	CreatedAt         time.Time                `json:"created_at"`
 	UpdatedAt         time.Time                `json:"updated_at"`
 }
@@ -75,6 +80,7 @@ type CategoryListResponse struct {
 type ListCategory struct {
 	query.Pagination
 	IsDisplayHomepage bool   `query:"is_display_homepage"`
+	IsDisplayHeader   bool   `json:"is_display_header"`
 	Name              string `query:"name"`
 }
 
@@ -93,6 +99,7 @@ func GetResponse(cate *Category) CategoryResponse {
 		CreatedAt:         cate.CreatedAt,
 		Status:            status,
 		IsDisplayHomepage: cate.IsDisplayHomepage,
+		IsDisplayHeader:   cate.IsDisplayHeader,
 		Metadata:          cate.Metadata,
 	}
 	return cateResponse

@@ -101,6 +101,7 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		createCategory.Level = parentCategory[0].Level + 1 // Set child category level
 	} else {
 		createCategory.ParentId = ""
+		createCategory.IsDisplayHeader = req.IsDisplayHeader
 	}
 
 	var category []dto.Category
@@ -125,6 +126,11 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	if req.IsDisplayHomepage {
 		query = query.Eq("is_display_homepage", "true")
 	}
+
+	if req.IsDisplayHeader {
+		query = query.Eq("is_display_header", "true")
+	}
+
 	err := query.Execute(&categories)
 	if err != nil {
 		log.Errorf("failed to fetch categories: %v", err)
@@ -204,6 +210,18 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"is_display_homepage": req.IsDisplayHomepage,
 			"updated_at":          time.Now(),
 			"parent_id":           req.ParentId,
+		}
+	} else if req.IsDisplayHomepage {
+		updateData = map[string]interface{}{
+			"name":                req.Name,
+			"thumbnail":           req.Thumbnail,
+			"status":              req.Status,
+			"metadata":            req.Metadata,
+			"description":         req.Description,
+			"is_display_homepage": req.IsDisplayHomepage,
+			"updated_at":          time.Now(),
+			"parent_id":           "",
+			"is_display_header":   req.IsDisplayHeader,
 		}
 	}
 

@@ -86,3 +86,11 @@ type ListUser struct {
 	Status enum.Status `query:"status"`
 	Name   string      `query:"name"`
 }
+
+type ResetPasswordRequest struct {
+	Email string `json:"email"`
+}
+
+type ForgotPasswordRequest struct {
+	NewPassword string `json:"new_password"`
+}

@@ -38,6 +38,8 @@ func (c *userController) Register(g *echo.Group) {
 	g.PUT("/update", c.Update, c.authMiddleware)
 	g.PUT("/address", c.Address, c.authMiddleware)
 	g.PUT("/change-password", c.ChangePassword, c.authMiddleware)
+	g.PUT("/send-magic-link", c.SendMagicLink)
+	g.PUT("/forgot-password", c.ForgotPassword, c.authMiddleware)
 
 	g.GET("/:id", c.GetById) // ← NEW
 }
@@ -74,4 +76,12 @@ func (c *userController) Address(e echo.Context) error {
 
 func (c *userController) ChangePassword(e echo.Context) error {
 	return api.Execute(e, c.userService.ChangePassword)
+}
+
+func (c *userController) SendMagicLink(e echo.Context) error {
+	return api.Execute(e, c.userService.SendMagicLink)
+}
+
+func (c *userController) ForgotPassword(e echo.Context) error {
+	return api.Execute(e, c.userService.ForgotPassword)
 }

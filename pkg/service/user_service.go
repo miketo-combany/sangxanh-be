@@ -24,6 +24,8 @@ type UserService interface {
 	UpdateUserAddress(ctx context.Context, req dto.UserUpdateAddressRequest) (api.Response, error)
 	GetUserById(ctx context.Context, id string) (api.Response, error) // ← NEW
 	ChangePassword(ctx context.Context, req dto.ChangePassword) (api.Response, error)
+	SendMagicLink(ctx context.Context, req dto.ResetPasswordRequest) (api.Response, error)
+	ForgotPassword(ctx context.Context, req dto.ForgotPasswordRequest) (api.Response, error)
 }
 
 type userService struct {
@@ -281,6 +283,43 @@ func (s *userService) ChangePassword(ctx context.Context, req dto.ChangePassword
 	return api.Success(user), nil
 }
 
-//func (s *userService) ForgotPassword(ctx context.Context) (api.Response, error) {
-//	s.db.Auth.
-//}
+func (s *userService) SendMagicLink(ctx context.Context, request dto.ResetPasswordRequest) (api.Response, error) {
+	err := s.db.Auth.SendMagicLink(ctx, request.Email)
+	if err != nil {
+		return nil, err
+	}
+	return api.Success("email sent successfully"), nil
+}
+
+func (s *userService) ForgotPassword(ctx context.Context, request dto.ForgotPasswordRequest) (api.Response, error) {
+	userID, ok := ctx.Value("user_id").(string)
+	if !ok || userID == "" {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User ID not found in context")
+	}
+	userToken, ok := ctx.Value("token").(string)
+	if !ok || userToken == "" {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User Token not found in context")
+	}
+	var users []dto.User
+	err := s.db.DB.From("users").Select("*").Eq("id", userID).Execute(&users)
+	if err != nil {
+		log.Errorf("failed to find user: %v", err)
+		return nil, fmt.Errorf("user not found")
+	}
+	updateData := map[string]interface{}{
+		"password":   request.NewPassword,
+		"updated_at": time.Now(),
+	}
+	user, err := s.db.Auth.UpdateUser(ctx, userToken, updateData)
+	if err != nil {
+		log.Errorf("failed to update user: %v", err)
+		return nil, err
+	}
+	err = s.db.DB.From("users").Update(updateData).Eq("id", userID).Execute(nil)
+	if err != nil {
+		log.Errorf("failed to update user: %v", err)
+		return nil, err
+	}
+
+	return api.Success(user), nil
+}
