@@ -43,6 +43,7 @@ jobs:
       - name: Deploy to VM
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd ~/dev/sangxanh-be
             docker compose down
             docker pull us-central1-docker.pkg.dev/iamntnm/backend/sangxanh-api:latest
             docker compose up -d
