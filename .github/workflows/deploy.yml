@@ -25,7 +25,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: LOCATION-docker.pkg.dev/PROJECT-ID/REPO/IMAGE:latest
+          tags: us-central1-docker.pkg.dev/iamntnm/backend/sangxanh:latest
 
   deploy:
     runs-on: ubuntu-latest
