@@ -157,6 +157,7 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	}
 
 	req.Pagination.Total = int64(len(categoryResponses))
+	log.Info("this is testing server")
 
 	categoryResponsesPage := categoryResponses[req.Limit*(req.Page-1) : req.Limit*req.Page]
 
