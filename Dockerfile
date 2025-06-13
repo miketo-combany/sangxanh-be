@@ -5,9 +5,13 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 
+COPY go.mod .
+COPY go.sum .
+RUN go mod tidy
+
 COPY . .
 
-RUN go build -o SangXanh ./cmd/api/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o SangXanh ./cmd/api/main.go
 
 # --- Stage 2: Run ---
 FROM alpine:latest
