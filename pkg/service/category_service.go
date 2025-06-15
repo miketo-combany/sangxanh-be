@@ -212,7 +212,7 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"updated_at":          time.Now(),
 			"parent_id":           req.ParentId,
 		}
-	} else if req.IsDisplayHomepage {
+	} else if req.IsDisplayHeader {
 		updateData = map[string]interface{}{
 			"name":                req.Name,
 			"thumbnail":           req.Thumbnail,
@@ -221,7 +221,6 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"description":         req.Description,
 			"is_display_homepage": req.IsDisplayHomepage,
 			"updated_at":          time.Now(),
-			"parent_id":           "",
 			"is_display_header":   req.IsDisplayHeader,
 		}
 	}
