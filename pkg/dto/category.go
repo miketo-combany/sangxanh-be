@@ -80,7 +80,7 @@ type CategoryListResponse struct {
 type ListCategory struct {
 	query.Pagination
 	IsDisplayHomepage bool   `query:"is_display_homepage"`
-	IsDisplayHeader   bool   `json:"is_display_header"`
+	IsDisplayHeader   bool   `query:"is_display_header"`
 	Name              string `query:"name"`
 }
 
