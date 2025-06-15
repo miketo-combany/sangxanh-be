@@ -196,7 +196,6 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest)
 	}
 
 	updateData := map[string]interface{}{
-		"username":      req.Username,
 		"full_name":     req.FullName,
 		"email":         req.Email,
 		"avatar":        req.Avatar,
@@ -206,6 +205,7 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest)
 		"updated_at":    time.Now(),
 	}
 
+	log.Info("===============")
 	var updated []dto.User
 	err = s.db.DB.From("users").Update(updateData).Eq("id", req.Id).Execute(&updated)
 	if err != nil {
