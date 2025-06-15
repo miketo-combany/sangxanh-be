@@ -39,6 +39,10 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 		Select("id").
 		IsNull("deleted_at") // keep soft‑deleted rows out
 	// Apply the same filter conditions
+	if filter.Name != "" {
+		encoded := url.QueryEscape("%" + filter.Name + "%")
+		q = q.Like("name", encoded)
+	}
 	if filter.CategoryId != "" {
 		q = q.Eq("category_id", filter.CategoryId)
 	}
@@ -235,10 +239,10 @@ func (s *productService) GetProductById(
 	}
 
 	for _, o := range optRaw {
-		if o.Price < minPrice {
+		if o.Price <= minPrice {
 			minPrice = o.Price
 		}
-		if o.Price > maxPrice {
+		if o.Price >= maxPrice {
 			maxPrice = o.Price
 		}
 
@@ -280,8 +284,8 @@ func (s *productService) GetProductById(
 	 *───────────────────────────────────────────────────────*/
 	product.ProductOptions = opts
 	product.ProductVariants = variants
-	product.MinPrice = float32(minPrice)
-	product.MaxPrice = float32(maxPrice)
+	product.MinPrice = float32(minPrice) + product.Price
+	product.MaxPrice = float32(maxPrice) + product.Price
 
 	return api.Success(product), nil
 }
