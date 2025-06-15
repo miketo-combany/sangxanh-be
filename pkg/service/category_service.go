@@ -177,6 +177,7 @@ func buildCategoryResponse(category dto.Category) dto.CategoryListResponse {
 		Status:            enum.ToStatus(category.Status),
 		Metadata:          category.Metadata,
 		IsDisplayHomepage: category.IsDisplayHomepage,
+		IsDisplayHeader:   category.IsDisplayHeader,
 		CreatedAt:         category.CreatedAt,
 		UpdatedAt:         category.UpdatedAt,
 	}
