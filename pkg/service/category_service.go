@@ -214,7 +214,7 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"updated_at":          time.Now(),
 			"parent_id":           req.ParentId,
 		}
-	} else if req.IsDisplayHeader {
+	} else {
 		updateData = map[string]interface{}{
 			"name":                req.Name,
 			"thumbnail":           req.Thumbnail,
