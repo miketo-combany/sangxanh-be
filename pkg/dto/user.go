@@ -17,18 +17,20 @@ type User struct {
 	Phone        string            `json:"phone"`
 	Email        string            `json:"email"`
 	Metadata     map[string]string `json:"metadata"`
+	Status       enum.Status       `json:"status"`
 }
 
 type UserInfo struct {
-	Id           string    `json:"id"`
-	Username     string    `json:"username"`
-	Role         enum.Role `json:"role"`
-	Address      []Address `json:"address"`
-	BasicAddress string    `json:"basic_address"`
-	FullName     string    `json:"full_name"`
-	Avatar       string    `json:"avatar"`
-	Phone        string    `json:"phone"`
-	Email        string    `json:"email"`
+	Id           string      `json:"id"`
+	Username     string      `json:"username"`
+	Role         enum.Role   `json:"role"`
+	Address      []Address   `json:"address"`
+	BasicAddress string      `json:"basic_address"`
+	FullName     string      `json:"full_name"`
+	Avatar       string      `json:"avatar"`
+	Phone        string      `json:"phone"`
+	Email        string      `json:"email"`
+	Status       enum.Status `json:"status"`
 }
 
 type Address struct {
@@ -73,6 +75,12 @@ type UserUpdateRequest struct {
 	BasicAddress string            `json:"basic_address"`
 	FullName     string            `json:"full_name"`
 	Metadata     map[string]string `json:"metadata"`
+	Status       string            `json:"status"`
+}
+
+type UserUpdateData struct {
+	Id     string      `json:"id"`
+	Status enum.Status `json:"status"`
 }
 
 type UserUpdateAddressRequest struct {

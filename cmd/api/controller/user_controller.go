@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/common/api"
 	"SangXanh/pkg/dto"
 	"SangXanh/pkg/service"
@@ -40,6 +41,7 @@ func (c *userController) Register(g *echo.Group) {
 	g.PUT("/change-password", c.ChangePassword, c.authMiddleware)
 	g.PUT("/send-magic-link", c.SendMagicLink)
 	g.PUT("/forgot-password", c.ForgotPassword, c.authMiddleware)
+	g.PUT("/update-status", c.UpdateStatus, c.authMiddleware, middleware.RequireRoles("admin"))
 
 	g.GET("/:id", c.GetById) // ← NEW
 }
@@ -84,4 +86,8 @@ func (c *userController) SendMagicLink(e echo.Context) error {
 
 func (c *userController) ForgotPassword(e echo.Context) error {
 	return api.Execute(e, c.userService.ForgotPassword)
+}
+
+func (c *userController) UpdateStatus(e echo.Context) error {
+	return api.Execute(e, c.userService.UpdateStatus)
 }

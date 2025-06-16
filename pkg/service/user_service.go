@@ -26,6 +26,7 @@ type UserService interface {
 	ChangePassword(ctx context.Context, req dto.ChangePassword) (api.Response, error)
 	SendMagicLink(ctx context.Context, req dto.ResetPasswordRequest) (api.Response, error)
 	ForgotPassword(ctx context.Context, req dto.ForgotPasswordRequest) (api.Response, error)
+	UpdateStatus(ctx context.Context, request dto.UserUpdateData) (api.Response, error)
 }
 
 type userService struct {
@@ -81,7 +82,7 @@ func (s *userService) ListUser(ctx context.Context, filter dto.ListUser) (api.Re
 	query := s.db.DB.
 		From("users").
 		// pull just the columns you really need
-		Select("id,username,email,role,avatar,phone,basic_address,metadata,created_at,updated_at").
+		Select("id,username,email,role,avatar,phone,basic_address,metadata,status,created_at,updated_at").
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at") // keep soft-deleted rows out
 
@@ -329,4 +330,26 @@ func (s *userService) ForgotPassword(ctx context.Context, request dto.ForgotPass
 	}
 
 	return api.Success(user), nil
+}
+
+func (s *userService) UpdateStatus(ctx context.Context, request dto.UserUpdateData) (api.Response, error) {
+	var users []dto.User
+	err := s.db.DB.From("users").Select("*").Eq("id", request.Id).Execute(&users)
+	if err != nil {
+		log.Errorf("failed to find user: %v", err)
+		return nil, fmt.Errorf("user not found")
+	}
+	if len(users) == 0 {
+		return nil, fmt.Errorf("user does not exist")
+	}
+	updateData := map[string]interface{}{
+		"status": request.Status,
+	}
+	var updated []dto.UserInfo
+	err = s.db.DB.From("users").Update(updateData).Eq("id", request.Id).Execute(&updated)
+	if err != nil {
+		log.Errorf("failed to update user: %v", err)
+		return nil, err
+	}
+	return api.Success(updated[0]), nil
 }
