@@ -29,6 +29,7 @@ func (c *categoryController) Register(g *echo.Group) {
 	g.POST("/create", c.Create, c.middleware, middleware.RequireRoles("admin"))
 	g.PUT("/update", c.Update, c.middleware, middleware.RequireRoles("admin"))
 	g.DELETE("/delete", c.Delete, c.middleware, middleware.RequireRoles("admin"))
+	g.GET("/list-header", c.ListHeader)
 }
 
 func (c *categoryController) List(e echo.Context) error {
@@ -56,5 +57,11 @@ func (c *categoryController) Delete(e echo.Context) error {
 	id := e.QueryParam("categoryId") // Get "id" parameter from URL
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.categoryService.DeleteCategory(ctx, id)
+	})
+}
+
+func (c *categoryController) ListHeader(e echo.Context) error {
+	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
+		return c.categoryService.ListHeaderCategories(ctx)
 	})
 }

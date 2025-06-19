@@ -11,9 +11,9 @@ import (
 )
 
 type CartService interface {
-	CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error)
-	GetCartsByUserID(ctx context.Context, userID string) (api.Response, error)
-	UpdateCart(ctx context.Context, req dto.CartUpdate, userID string) (api.Response, error)
+	CreateCart(ctx context.Context, req dto.CartCreateRequest) (api.Response, error)
+	GetCartsByUserID(ctx context.Context) (api.Response, error)
+	UpdateCart(ctx context.Context, req dto.CartUpdate) (api.Response, error)
 	DeleteCart(ctx context.Context, id string) (api.Response, error)
 }
 
@@ -29,9 +29,10 @@ func NewCartService(di do.Injector) (CartService, error) {
 	return &cartService{db: db}, nil
 }
 
-func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest, userID string) (api.Response, error) {
+func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest) (api.Response, error) {
+	userID := ctx.Value("user_id")
 	var created []dto.Cart
-	req.UserID = userID
+	req.UserID = userID.(string)
 
 	if err := s.db.DB.
 		From("carts").
@@ -51,13 +52,14 @@ func (s *cartService) CreateCart(ctx context.Context, req dto.CartCreateRequest,
 	return api.Success(created[0]), nil
 }
 
-func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.Response, error) {
+func (s *cartService) GetCartsByUserID(ctx context.Context) (api.Response, error) {
+	userID := ctx.Value("user_id")
 	// Query to get carts for a specific user
 	var carts []dto.Cart
 	if err := s.db.DB.
 		From("carts").
 		Select("id,user_id,product_option_id,quantity,created_at,updated_at").
-		Eq("user_id", userID).
+		Eq("user_id", userID.(string)).
 		IsNull("deleted_at").
 		Execute(&carts); err != nil {
 		return nil, fmt.Errorf("failed to fetch carts for user %s: %w", userID, err)
@@ -88,18 +90,19 @@ func (s *cartService) GetCartsByUserID(ctx context.Context, userID string) (api.
 	return api.Success(cartResponses), nil
 }
 
-func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate, userID string) (api.Response, error) {
+func (s *cartService) UpdateCart(ctx context.Context, req dto.CartUpdate) (api.Response, error) {
 	updateData := map[string]interface{}{
 		"quantity":   req.Quantity,
 		"updated_at": time.Now(),
 	}
 
+	userID := ctx.Value("user_id")
 	var updated []dto.Cart
 	if err := s.db.DB.
 		From("carts").
 		Update(updateData).
 		Eq("id", req.ID).
-		Eq("user_id", userID).
+		Eq("user_id", userID.(string)).
 		Execute(&updated); err != nil {
 		return nil, fmt.Errorf("failed to update cart: %w", err)
 	}

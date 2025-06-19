@@ -30,23 +30,20 @@ func (c *cartController) Register(g *echo.Group) {
 }
 
 func (c *cartController) List(e echo.Context) error {
-	userID := e.Get("user_id").(string) // Get user ID from the access token
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
-		return c.cartService.GetCartsByUserID(ctx, userID)
+		return c.cartService.GetCartsByUserID(ctx)
 	})
 }
 
 func (c *cartController) Create(e echo.Context) error {
-	userID := e.Get("user_id").(string) // Get user ID from the access token
 	return api.Execute(e, func(ctx context.Context, req dto.CartCreateRequest) (api.Response, error) {
-		return c.cartService.CreateCart(ctx, req, userID)
+		return c.cartService.CreateCart(ctx, req)
 	})
 }
 
 func (c *cartController) Update(e echo.Context) error {
-	userID := e.Get("user_id").(string)
 	return api.Execute(e, func(ctx context.Context, req dto.CartUpdate) (api.Response, error) {
-		return c.cartService.UpdateCart(ctx, req, userID)
+		return c.cartService.UpdateCart(ctx, req)
 	})
 }
 

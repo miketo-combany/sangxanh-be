@@ -18,6 +18,7 @@ import (
 
 type CategoryService interface {
 	CreateCategory(ctx context.Context, req dto.CategoryCreate) (api.Response, error)
+	ListHeaderCategories(ctx context.Context) (api.Response, error)
 	ListCategories(ctx context.Context, req dto.ListCategory) (api.Response, error)
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
 	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
@@ -330,4 +331,31 @@ func clone(n *node) dto.CategoryListResponse {
 		out.Categories[i] = clone(k)
 	}
 	return out
+}
+
+func (u *categoryService) ListHeaderCategories(ctx context.Context) (api.Response, error) {
+	// 1️⃣ Lấy toàn bộ categories chưa bị xóa
+	var categories []dto.Category
+	err := u.db.DB.
+		From("categories").
+		Select("*").
+		IsNull("deleted_at").
+		Execute(&categories)
+	if err != nil {
+		log.Errorf("failed to fetch categories: %v", err)
+		return nil, err
+	}
+
+	// 2️⃣ Xây cây đầy đủ
+	fullTree := BuildCategoryTree(categories)
+
+	// 3️⃣ Chỉ giữ lại những root có is_display_header = true
+	var result []dto.CategoryListResponse
+	for _, root := range fullTree {
+		if root.IsDisplayHeader {
+			result = append(result, root)
+		}
+	}
+
+	return api.Success(result), nil
 }
