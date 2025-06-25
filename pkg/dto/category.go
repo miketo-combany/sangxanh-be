@@ -82,6 +82,7 @@ type ListCategory struct {
 	IsDisplayHomepage bool   `query:"is_display_homepage"`
 	IsDisplayHeader   bool   `query:"is_display_header"`
 	Name              string `query:"name"`
+	ParentId          string `query:"parent_id"`
 }
 
 func GetResponse(cate *Category) CategoryResponse {

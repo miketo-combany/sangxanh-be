@@ -130,8 +130,11 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 	}
 
 	if req.IsDisplayHeader {
-		log.Info("==========")
 		query = query.Eq("is_display_header", "true")
+	}
+
+	if req.ParentId != "" {
+		query = query.Eq("parent_id", req.ParentId)
 	}
 
 	err := query.Execute(&categories)

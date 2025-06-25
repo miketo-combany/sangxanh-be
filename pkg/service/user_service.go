@@ -174,7 +174,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 	_, err = s.db.Auth.SignUp(ctx, user)
 	if err != nil {
 		log.Errorf("failed to insert user: %v", err)
-		return nil, fmt.Errorf(err.Error())
+		return api.Error(http.StatusUnauthorized, "unauthorized", nil, err), fmt.Errorf(err.Error())
 	}
 
 	return api.Success(user), nil

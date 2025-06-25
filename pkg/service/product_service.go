@@ -82,8 +82,15 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		encoded := url.QueryEscape("%" + filter.Name + "%")
 		query = query.Like("name", encoded)
 	}
+
 	if filter.CategoryId != "" {
-		query = query.Eq("category_id", filter.CategoryId)
+		var categoryIds []string
+		err = s.db.DB.From("categories").Select("id").Eq("parent_id", filter.CategoryId).Execute(&categoryIds)
+		if err != nil {
+			return nil, err
+		}
+		categoryIds = append(categoryIds, filter.CategoryId)
+		query = query.In("category_id", categoryIds)
 	}
 	if filter.IsDiscount {
 		query = query.Not().IsNull("discount")

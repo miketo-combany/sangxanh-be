@@ -14,6 +14,11 @@ var validate = validator.New()
 type Response interface {
 }
 
+type ErrorResponse struct {
+	StatusCode int
+	Body       response
+}
+
 type responseMeta struct {
 	*query.Pagination
 	Message string `json:"message"`
@@ -45,6 +50,19 @@ func SuccessPagination(data any, p *query.Pagination) Response {
 	}
 }
 
+func Error(statusCode int, message string, debug any, err error) Response {
+	return ErrorResponse{
+		StatusCode: statusCode,
+		Body: response{
+			Meta: responseMeta{
+				Message: message,
+				Debug:   debug,
+				Error:   err.Error(),
+			},
+		},
+	}
+}
+
 type API[Req any] func(e echo.Context, req Req) (Response, error)
 
 func Execute[Req any](c echo.Context, f func(e context.Context, req Req) (Response, error)) error {
@@ -72,6 +90,11 @@ func Serve(c echo.Context, resp Response, err error) error {
 				},
 			})
 		}
+
+		if e, ok := resp.(ErrorResponse); ok {
+			return c.JSON(e.StatusCode, e.Body)
+		}
+
 		return c.JSON(http.StatusInternalServerError, response{
 			Meta: responseMeta{
 				Message: "",
@@ -79,5 +102,8 @@ func Serve(c echo.Context, resp Response, err error) error {
 			},
 		})
 	}
+
+	// Handle if Response is ErrorResponse
+
 	return c.JSON(http.StatusOK, resp)
 }

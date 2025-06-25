@@ -145,7 +145,7 @@ func (s *orderService) GetOrderById(ctx context.Context, id string) (api.Respons
 	var details []dto.OrderDetail
 	if err := s.db.DB.
 		From("order_details").
-		Select("id,order_id,product_option_id,quantity,discount,discount_type,metadata").
+		Select("id,order_id,product_option_id,product_options!inner(*),quantity,discount,discount_type,metadata").
 		Eq("order_id", id).
 		IsNull("deleted_at").
 		Execute(&details); err != nil {
@@ -173,14 +173,26 @@ func (s *orderService) CreateOrder(ctx context.Context, req dto.OrderCreate) (ap
 		return nil, err
 	}
 
-	userId := ctx.Value("user_id")
-	// 2) insert into orders --------------------------------------------------
+	// 2️⃣ lấy user id nếu có
+	var userID string
+	if val := ctx.Value("user_id"); val != nil {
+		if uid, ok := val.(string); ok {
+			userID = uid
+		}
+	}
+
+	// 3️⃣ insert order
 	orderBody := map[string]interface{}{
-		"user_id":  userId.(string),
 		"address":  req.Address,
 		"status":   enum.Pending,
 		"metadata": req.Metadata,
 	}
+
+	// Chỉ thêm user_id nếu có
+	if userID != "" {
+		orderBody["user_id"] = userID
+	}
+
 	var createdOrders []dto.Order
 	if err := s.db.DB.From("orders").Insert(orderBody).Execute(&createdOrders); err != nil {
 		return nil, fmt.Errorf("failed to create order: %v", err)
@@ -201,7 +213,6 @@ func (s *orderService) CreateOrder(ctx context.Context, req dto.OrderCreate) (ap
 	}
 
 	if err := s.db.DB.From("order_details").Insert(odRows).Execute(nil); err != nil {
-		// best-effort rollback
 		_ = s.db.DB.From("orders").Delete().Eq("id", orderId).Execute(nil)
 		return nil, fmt.Errorf("failed to insert order details: %v", err)
 	}

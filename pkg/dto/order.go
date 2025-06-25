@@ -23,6 +23,7 @@ type OrderDetail struct {
 	DeletedAt       time.Time                `json:"deleted_at"`
 	OrderId         string                   `json:"order_id"`
 	ProductOptionId string                   `json:"product_option_id"`
+	ProductOption   ProductOption            `json:"product_options"`
 	Quantity        int                      `json:"quantity"`
 	Discount        float64                  `json:"discount"`
 	DiscountType    enum.DiscountType        `json:"discount_type"`

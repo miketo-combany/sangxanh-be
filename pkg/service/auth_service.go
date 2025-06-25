@@ -53,7 +53,7 @@ func (a *authService) Login(ctx context.Context, req dto.LoginRequest) (api.Resp
 		Password: req.Password,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("login failed: %v", err)
+		return api.Error(http.StatusUnauthorized, "login failed", nil, err), err
 	}
 
 	resp := dto.AuthResponse{
@@ -72,7 +72,7 @@ func (a *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) 
 	authDetails, err := a.db.Auth.RefreshUser(ctx, "", req.RefreshToken)
 	if err != nil {
 		log.Errorf("failed to refresh session: %v", err)
-		return nil, fmt.Errorf("failed to refresh token")
+		return api.Error(http.StatusUnauthorized, "unauthorized", "", err), fmt.Errorf("failed to refresh token")
 	}
 
 	resp := dto.AuthResponse{
