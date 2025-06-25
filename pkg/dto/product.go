@@ -81,6 +81,7 @@ type ProductList struct {
 	ImageDetail  string            `json:"image_detail"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
+	Metadata     map[string]string `json:"metadata"`
 }
 
 type CategoryProduct struct {
@@ -113,4 +114,5 @@ type ProductDetail struct {
 	CategoryProduct CategoryProduct         `json:"categories"`
 	ProductOptions  []ProductOptionResponse `json:"product_option_detail"`
 	ProductVariants []ProductVariant        `json:"product_variant_detail"`
+	Metadata        map[string]string       `json:"metadata"`
 }
