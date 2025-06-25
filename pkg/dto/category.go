@@ -9,6 +9,7 @@ import (
 type Category struct {
 	Id                string                   `json:"id"`
 	Name              string                   `json:"name"`
+	Icon              string                   `json:"icon"`
 	Metadata          []map[string]interface{} `json:"metadata"`
 	Status            bool                     `json:"status"`
 	Thumbnail         string                   `json:"thumbnail"`
@@ -20,10 +21,12 @@ type Category struct {
 	Description       string                   `json:"description"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	IsDisplayHeader   bool                     `json:"is_display_header"`
+	IsSubHeader       bool                     `json:"is_sub_header"`
 }
 
 type CategoryCreate struct {
 	Name              string                   `json:"name"`
+	Icon              string                   `json:"icon"`
 	Thumbnail         string                   `json:"thumbnail"`
 	ParentId          string                   `json:"parent_id,omitempty"`
 	Status            bool                     `json:"status"`
@@ -32,11 +35,13 @@ type CategoryCreate struct {
 	Level             int                      `json:"level"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	IsDisplayHeader   bool                     `json:"is_display_header"`
+	IsSubHeader       bool                     `json:"is_sub_header"`
 }
 
 type CategoryUpdate struct {
 	Id                string                   `json:"id"`
 	Name              string                   `json:"name"`
+	Icon              string                   `json:"icon"`
 	Thumbnail         string                   `json:"thumbnail"`
 	Status            bool                     `json:"status"`
 	Metadata          []map[string]interface{} `json:"metadata"`
@@ -44,6 +49,7 @@ type CategoryUpdate struct {
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	ParentId          string                   `json:"parent_id,omitempty"`
 	IsDisplayHeader   bool                     `json:"is_display_header"`
+	IsSubHeader       bool                     `json:"is_sub_header"`
 }
 
 type CategoryResponse struct {
@@ -51,6 +57,7 @@ type CategoryResponse struct {
 	Name              string                   `json:"name"`
 	Thumbnail         string                   `json:"thumbnail"`
 	Level             int                      `json:"level"`
+	Icon              string                   `json:"icon"`
 	Description       string                   `json:"description"`
 	Categories        []Category               `json:"categories"`
 	UpdatedAt         time.Time                `json:"updated_at"`
@@ -59,11 +66,13 @@ type CategoryResponse struct {
 	Metadata          []map[string]interface{} `json:"metadata"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	IsDisplayHeader   bool                     `json:"is_display_header"`
+	IsSubHeader       bool                     `json:"is_sub_header"`
 }
 
 type CategoryListResponse struct {
 	Id                string                   `json:"id"`
 	Name              string                   `json:"name"`
+	Icon              string                   `json:"icon"`
 	Thumbnail         string                   `json:"thumbnail"`
 	Level             int                      `json:"level"`
 	Description       string                   `json:"description"`
@@ -73,6 +82,7 @@ type CategoryListResponse struct {
 	Metadata          []map[string]interface{} `json:"metadata"`
 	IsDisplayHomepage bool                     `json:"is_display_homepage"`
 	IsDisplayHeader   bool                     `json:"is_display_header"`
+	IsSubHeader       bool                     `json:"is_sub_header"`
 	CreatedAt         time.Time                `json:"created_at"`
 	UpdatedAt         time.Time                `json:"updated_at"`
 }
@@ -81,6 +91,7 @@ type ListCategory struct {
 	query.Pagination
 	IsDisplayHomepage bool   `query:"is_display_homepage"`
 	IsDisplayHeader   bool   `query:"is_display_header"`
+	IsSubHeader       bool   `query:"is_sub_header"`
 	Name              string `query:"name"`
 	ParentId          string `query:"parent_id"`
 }
@@ -92,6 +103,7 @@ func GetResponse(cate *Category) CategoryResponse {
 	}
 	cateResponse := CategoryResponse{
 		Id:                cate.Id,
+		Icon:              cate.Icon,
 		Name:              cate.Name,
 		Thumbnail:         cate.Thumbnail,
 		Level:             cate.Level,
@@ -101,6 +113,7 @@ func GetResponse(cate *Category) CategoryResponse {
 		Status:            status,
 		IsDisplayHomepage: cate.IsDisplayHomepage,
 		IsDisplayHeader:   cate.IsDisplayHeader,
+		IsSubHeader:       cate.IsSubHeader,
 		Metadata:          cate.Metadata,
 	}
 	return cateResponse

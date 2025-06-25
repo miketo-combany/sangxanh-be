@@ -62,16 +62,20 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 
 	// 2. Build the response payload (same fields you return elsewhere)
 	categoryResponse := dto.CategoryResponse{
-		Id:          cat.Id,
-		Name:        cat.Name,
-		Thumbnail:   cat.Thumbnail,
-		Level:       cat.Level,
-		Description: cat.Description,
-		Status:      enum.ToStatus(cat.Status),
-		Categories:  childCategories,
-		Metadata:    cat.Metadata,
-		CreatedAt:   cat.CreatedAt,
-		UpdatedAt:   cat.UpdatedAt,
+		Id:                cat.Id,
+		Name:              cat.Name,
+		Thumbnail:         cat.Thumbnail,
+		Level:             cat.Level,
+		Description:       cat.Description,
+		Status:            enum.ToStatus(cat.Status),
+		Categories:        childCategories,
+		IsDisplayHeader:   cat.IsDisplayHeader,
+		IsDisplayHomepage: cat.IsDisplayHomepage,
+		IsSubHeader:       cat.IsSubHeader,
+		Icon:              cat.Icon,
+		Metadata:          cat.Metadata,
+		CreatedAt:         cat.CreatedAt,
+		UpdatedAt:         cat.UpdatedAt,
 	}
 
 	return api.Success(categoryResponse), nil
@@ -85,6 +89,9 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		Thumbnail:         req.Thumbnail,
 		Description:       req.Description,
 		IsDisplayHomepage: req.IsDisplayHomepage,
+		IsDisplayHeader:   req.IsDisplayHeader,
+		IsSubHeader:       req.IsSubHeader,
+		Icon:              req.Icon,
 	}
 
 	var parentCategory []dto.Category
@@ -131,6 +138,10 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 
 	if req.IsDisplayHeader {
 		query = query.Eq("is_display_header", "true")
+	}
+
+	if req.IsSubHeader {
+		query = query.Eq("is_sub_header", "true")
 	}
 
 	if req.ParentId != "" {
@@ -182,6 +193,8 @@ func buildCategoryResponse(category dto.Category) dto.CategoryListResponse {
 		Metadata:          category.Metadata,
 		IsDisplayHomepage: category.IsDisplayHomepage,
 		IsDisplayHeader:   category.IsDisplayHeader,
+		IsSubHeader:       category.IsSubHeader,
+		Icon:              category.Icon,
 		CreatedAt:         category.CreatedAt,
 		UpdatedAt:         category.UpdatedAt,
 	}
@@ -228,6 +241,8 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"is_display_homepage": req.IsDisplayHomepage,
 			"updated_at":          time.Now(),
 			"is_display_header":   req.IsDisplayHeader,
+			"is_sub_header":       req.IsSubHeader,
+			"icon":                req.Icon,
 		}
 	}
 
