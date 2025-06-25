@@ -39,7 +39,6 @@ func NewCategoryService(di do.Injector) (CategoryService, error) {
 }
 
 func (u *categoryService) ListCategoryById(ctx context.Context, categoryId string) (api.Response, error) {
-	// 1. Fetch the category that matches the given ID and has not been soft‑deleted
 	var categories []dto.Category
 	err := u.db.DB.
 		From("categories").
@@ -48,19 +47,26 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 		IsNull("deleted_at").
 		Execute(&categories)
 
-	if err != nil {
+	if err != nil || len(categories) == 0 {
 		log.Errorf("failed to fetch category %s: %v", categoryId, err)
-		return nil, fmt.Errorf("failed to fetch category")
-	}
-	if len(categories) == 0 {
 		return nil, fmt.Errorf("category not found")
 	}
 	cat := categories[0]
-	var childCategories []dto.Category
-	err = u.db.DB.From("categories").Select("*").Eq("parent_id", categoryId).IsNull("deleted_at").Execute(&childCategories)
-	log.Info("category", categoryId, "childCategories", childCategories)
 
-	// 2. Build the response payload (same fields you return elsewhere)
+	var childCategories []dto.Category
+	_ = u.db.DB.From("categories").Select("*").Eq("parent_id", categoryId).IsNull("deleted_at").Execute(&childCategories)
+
+	var products []dto.ProductShortInfo
+	if len(cat.FavoProductIds) > 0 {
+		_ = u.db.DB.
+			From("products").
+			Select("id, name, thumbnail, price").
+			In("id", cat.FavoProductIds).
+			Eq("category_id", cat.Id).
+			IsNull("deleted_at").
+			Execute(&products)
+	}
+
 	categoryResponse := dto.CategoryResponse{
 		Id:                cat.Id,
 		Name:              cat.Name,
@@ -74,6 +80,8 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 		IsSubHeader:       cat.IsSubHeader,
 		Icon:              cat.Icon,
 		Metadata:          cat.Metadata,
+		FavoProductIds:    cat.FavoProductIds,
+		FavoProducts:      products,
 		CreatedAt:         cat.CreatedAt,
 		UpdatedAt:         cat.UpdatedAt,
 	}
@@ -92,6 +100,25 @@ func (u *categoryService) CreateCategory(ctx context.Context, req dto.CategoryCr
 		IsDisplayHeader:   req.IsDisplayHeader,
 		IsSubHeader:       req.IsSubHeader,
 		Icon:              req.Icon,
+		FavoProductIds:    req.FavoProductIds,
+	}
+
+	if len(req.FavoProductIds) > 0 {
+		var products []dto.ProductShortInfo
+		err := u.db.DB.
+			From("products").
+			Select("id").
+			In("id", req.FavoProductIds).
+			Eq("category_id", req.ParentId). // hoặc req.Id nếu là root
+			IsNull("deleted_at").
+			Execute(&products)
+		if err != nil {
+			log.Errorf("invalid favo_product_ids: %v", err)
+			return nil, fmt.Errorf("failed to verify favorite products")
+		}
+		if len(products) != len(req.FavoProductIds) {
+			return nil, fmt.Errorf("one or more favorite product IDs are invalid for the given category")
+		}
 	}
 
 	var parentCategory []dto.Category
@@ -154,6 +181,27 @@ func (u *categoryService) ListCategories(ctx context.Context, req dto.ListCatego
 		return nil, err
 	}
 
+	var allFavoProductIds []string
+	for _, c := range categories {
+		allFavoProductIds = append(allFavoProductIds, c.FavoProductIds...)
+	}
+	allFavoProductIds = lo.Uniq(allFavoProductIds)
+
+	var allProducts []dto.ProductShortInfo
+	if len(allFavoProductIds) > 0 {
+		_ = u.db.DB.
+			From("products").
+			Select("id, name, thumbnail, price, category_id").
+			In("id", allFavoProductIds).
+			IsNull("deleted_at").
+			Execute(&allProducts)
+	}
+
+	productMap := make(map[string][]dto.ProductShortInfo)
+	for _, p := range allProducts {
+		productMap[p.CategoryId] = append(productMap[p.CategoryId], p)
+	}
+
 	if req.IsDisplayHomepage {
 		return api.Success(categories), nil
 	}
@@ -191,6 +239,7 @@ func buildCategoryResponse(category dto.Category) dto.CategoryListResponse {
 		ParentId:          category.ParentId,
 		Status:            enum.ToStatus(category.Status),
 		Metadata:          category.Metadata,
+		FavoProductIds:    category.FavoProductIds,
 		IsDisplayHomepage: category.IsDisplayHomepage,
 		IsDisplayHeader:   category.IsDisplayHeader,
 		IsSubHeader:       category.IsSubHeader,
@@ -209,10 +258,29 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		return nil, fmt.Errorf("category not found")
 	}
 
+	if len(req.FavoProductIds) > 0 {
+		var products []dto.ProductShortInfo
+		err := u.db.DB.
+			From("products").
+			Select("id").
+			In("id", req.FavoProductIds).
+			Eq("category_id", req.Id).
+			IsNull("deleted_at").
+			Execute(&products)
+		if err != nil {
+			log.Errorf("invalid favo_product_ids on update: %v", err)
+			return nil, fmt.Errorf("failed to verify favorite products")
+		}
+		if len(products) != len(req.FavoProductIds) {
+			return nil, fmt.Errorf("one or more favorite product IDs are invalid for the given category")
+		}
+	}
+
 	updateData := map[string]interface{}{
 		"name":                req.Name,
 		"thumbnail":           req.Thumbnail,
 		"status":              req.Status,
+		"favo_product_ids":    req.FavoProductIds,
 		"metadata":            req.Metadata,
 		"description":         req.Description,
 		"is_display_homepage": req.IsDisplayHomepage,
@@ -348,6 +416,7 @@ func clone(n *node) dto.CategoryListResponse {
 	for i, k := range n.kids {
 		out.Categories[i] = clone(k)
 	}
+
 	return out
 }
 

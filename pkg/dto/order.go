@@ -7,27 +7,27 @@ import (
 )
 
 type Order struct {
-	Id        string                   `json:"id"`
-	CreatedAt time.Time                `json:"created_at"`
-	UpdatedAt time.Time                `json:"updated_at"`
-	UserId    string                   `json:"user_id"`
-	Address   string                   `json:"address"`
-	Status    enum.OrderStatus         `json:"status"`
-	Metadata  []map[string]interface{} `json:"metadata"`
+	Id        string                 `json:"id"`
+	CreatedAt time.Time              `json:"created_at"`
+	UpdatedAt time.Time              `json:"updated_at"`
+	UserId    string                 `json:"user_id"`
+	Address   string                 `json:"address"`
+	Status    enum.OrderStatus       `json:"status"`
+	Metadata  map[string]interface{} `json:"metadata"`
 }
 
 type OrderDetail struct {
-	Id              string                   `json:"id"`
-	CreatedAt       time.Time                `json:"created_at"`
-	UpdatedAt       time.Time                `json:"updated_at"`
-	DeletedAt       time.Time                `json:"deleted_at"`
-	OrderId         string                   `json:"order_id"`
-	ProductOptionId string                   `json:"product_option_id"`
-	ProductOption   ProductOption            `json:"product_options"`
-	Quantity        int                      `json:"quantity"`
-	Discount        float64                  `json:"discount"`
-	DiscountType    enum.DiscountType        `json:"discount_type"`
-	Metadata        []map[string]interface{} `json:"metadata"`
+	Id              string                 `json:"id"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+	DeletedAt       time.Time              `json:"deleted_at"`
+	OrderId         string                 `json:"order_id"`
+	ProductOptionId string                 `json:"product_option_id"`
+	ProductOption   ProductOption          `json:"product_options"`
+	Quantity        int                    `json:"quantity"`
+	Discount        float64                `json:"discount"`
+	DiscountType    enum.DiscountType      `json:"discount_type"`
+	Metadata        map[string]interface{} `json:"metadata"`
 }
 
 type OrderDetailBase struct {
@@ -40,18 +40,18 @@ type OrderDetailBase struct {
 }
 
 type OrderCreate struct {
-	UserId       string                   `json:"user_id"`
-	Address      string                   `json:"address"`
-	Status       enum.OrderStatus         `json:"status"`
-	Metadata     []map[string]interface{} `json:"metadata"`
-	OrderDetails []OrderDetailBase        `json:"order_details"`
+	UserId       string                 `json:"user_id"`
+	Address      string                 `json:"address"`
+	Status       enum.OrderStatus       `json:"status"`
+	Metadata     map[string]interface{} `json:"metadata"`
+	OrderDetails []OrderDetailBase      `json:"order_details"`
 }
 type OrderUpdate struct {
-	Id           string                   `json:"id"`
-	UserId       string                   `json:"user_id"`
-	Address      string                   `json:"address"`
-	Metadata     []map[string]interface{} `json:"metadata"`
-	OrderDetails []OrderDetailBase        `json:"order_details"`
+	Id           string                 `json:"id"`
+	UserId       string                 `json:"user_id"`
+	Address      string                 `json:"address"`
+	Metadata     map[string]interface{} `json:"metadata"`
+	OrderDetails []OrderDetailBase      `json:"order_details"`
 }
 
 type OrderDetailResponse struct {
