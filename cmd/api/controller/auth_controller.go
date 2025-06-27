@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"SangXanh/cmd/api/middleware"
 	"SangXanh/pkg/common/api"
+	"SangXanh/pkg/log"
 	"SangXanh/pkg/service"
 	"context"
 	"github.com/labstack/echo/v4"
@@ -28,14 +30,20 @@ func (c *authController) Register(g *echo.Group) {
 }
 
 func (c *authController) Login(e echo.Context) error {
+	ip := middleware.GetClientIP(e.Request())
+	log.Info("Login from IP: %s", ip)
 	return api.Execute(e, c.authService.Login)
 }
 
 func (c *authController) Refresh(e echo.Context) error {
+	ip := middleware.GetClientIP(e.Request())
+	log.Info("Login from IP: %s", ip)
 	return api.Execute(e, c.authService.Refresh)
 }
 
 func (c *authController) CurrentUser(e echo.Context) error {
+	ip := middleware.GetClientIP(e.Request())
+	log.Info("Login from IP: %s", ip)
 	return api.Execute(e, func(ctx context.Context, _ struct{}) (api.Response, error) {
 		return c.authService.GetCurrentUser(ctx)
 	})

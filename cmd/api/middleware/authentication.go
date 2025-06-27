@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -21,7 +22,7 @@ func AuthenticationMiddleware(jwtKey string) echo.MiddlewareFunc {
 			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 			token, err := util.VerifyJWT(tokenString, jwtKey)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+				return echo.NewHTTPError(402, err.Error())
 			}
 
 			// Extract claims
@@ -38,6 +39,22 @@ func AuthenticationMiddleware(jwtKey string) echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
+}
+
+func GetClientIP(r *http.Request) string {
+	// Nếu có proxy hoặc load balancer
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		// Có thể có nhiều IP, lấy IP đầu tiên
+		return strings.Split(forwarded, ",")[0]
+	}
+
+	// Nếu không có proxy
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return ip
 }
 
 func GetCurrentUser(c echo.Context) (api.Response, error) {

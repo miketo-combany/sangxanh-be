@@ -72,7 +72,7 @@ func (a *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) 
 	authDetails, err := a.db.Auth.RefreshUser(ctx, "", req.RefreshToken)
 	if err != nil {
 		log.Errorf("failed to refresh session: %v", err)
-		return api.Error(402, "unauthorized", "", err), fmt.Errorf("failed to refresh token")
+		return api.Error(http.StatusUnauthorized, "unauthorized", "", err), fmt.Errorf("failed to refresh token")
 	}
 
 	resp := dto.AuthResponse{
@@ -86,18 +86,18 @@ func (a *authService) Refresh(ctx context.Context, req dto.RefreshTokenRequest) 
 func (a *authService) GetCurrentUser(ctx context.Context) (api.Response, error) {
 	userID, ok := ctx.Value("user_id").(string)
 	if !ok || userID == "" {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User ID not found in context")
+		return nil, echo.NewHTTPError(402, "User ID not found in context")
 	}
 
 	userRole, ok := ctx.Value("user_role").(string)
 	if !ok || userRole == "" {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User role not found in context")
+		return nil, echo.NewHTTPError(402, "User role not found in context")
 	}
 
 	var user []dto.UserInfo
 	err := a.db.DB.From("users").Select("*").Eq("id", userID).Execute(&user)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "User not found")
+		return nil, echo.NewHTTPError(402, "User not found")
 	}
 	return api.Success(user[0]), nil
 }
