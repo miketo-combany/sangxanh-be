@@ -7,86 +7,86 @@ import (
 )
 
 type Product struct {
-	Id           string            `json:"id"`
-	Name         string            `json:"name"`
-	Price        float32           `json:"price"`
-	Content      string            `json:"content"`
-	ImageDetail  string            `json:"image_detail"`
-	Thumbnail    string            `json:"thumbnail"`
-	CategoryId   string            `json:"category_id"`
-	Discount     float32           `json:"discount"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-	ProductCode  string            `json:"product_code"`
-	Description  string            `json:"description"`
-	Metadata     map[string]string `json:"metadata"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
-	DeletedAt    time.Time         `json:"deleted_at"`
-	Question     map[string]string `json:"question"`
+	Id           string              `json:"id"`
+	Name         string              `json:"name"`
+	Price        float32             `json:"price"`
+	Content      string              `json:"content"`
+	ImageDetail  string              `json:"image_detail"`
+	Thumbnail    string              `json:"thumbnail"`
+	CategoryId   string              `json:"category_id"`
+	Discount     float32             `json:"discount"`
+	DiscountType enum.DiscountType   `json:"discount_type"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
+	Metadata     map[string]string   `json:"metadata"`
+	CreatedAt    time.Time           `json:"created_at"`
+	UpdatedAt    time.Time           `json:"updated_at"`
+	DeletedAt    time.Time           `json:"deleted_at"`
+	Questions    []map[string]string `json:"questions"`
 }
 
 type ProductCreated struct {
-	Name         string            `json:"name"`
-	Price        float32           `json:"price"`
-	Content      string            `json:"content"`
-	ImageDetail  string            `json:"image_detail"`
-	Thumbnail    string            `json:"thumbnail"`
-	CategoryId   string            `json:"category_id"`
-	Discount     float32           `json:"discount"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-	ProductCode  string            `json:"product_code"`
-	Description  string            `json:"description"`
-	Metadata     map[string]string `json:"metadata"`
-	Question     map[string]string `json:"question"`
+	Name         string              `json:"name"`
+	Price        float32             `json:"price"`
+	Content      string              `json:"content"`
+	ImageDetail  string              `json:"image_detail"`
+	Thumbnail    string              `json:"thumbnail"`
+	CategoryId   string              `json:"category_id"`
+	Discount     float32             `json:"discount"`
+	DiscountType enum.DiscountType   `json:"discount_type"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
+	Metadata     map[string]string   `json:"metadata"`
+	Questions    []map[string]string `json:"questions"`
 }
 
 type ProductUpdated struct {
-	Id           string            `json:"id"`
-	Name         string            `json:"name"`
-	Price        float32           `json:"price"`
-	Content      string            `json:"content"`
-	ProductCode  string            `json:"product_code"`
-	Description  string            `json:"description"`
-	ImageDetail  string            `json:"image_detail"`
-	Thumbnail    string            `json:"thumbnail"`
-	CategoryId   string            `json:"category_id"`
-	Discount     float32           `json:"discount"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-	Metadata     map[string]string `json:"metadata"`
-	Question     map[string]string `json:"question"`
+	Id           string              `json:"id"`
+	Name         string              `json:"name"`
+	Price        float32             `json:"price"`
+	Content      string              `json:"content"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
+	ImageDetail  string              `json:"image_detail"`
+	Thumbnail    string              `json:"thumbnail"`
+	CategoryId   string              `json:"category_id"`
+	Discount     float32             `json:"discount"`
+	DiscountType enum.DiscountType   `json:"discount_type"`
+	Metadata     map[string]string   `json:"metadata"`
+	Questions    []map[string]string `json:"questions"`
 }
 
 type ProductResponse struct {
-	Id           string            `json:"id"`
-	Name         string            `json:"name"`
-	Price        float32           `json:"price"`
-	Content      string            `json:"content"`
-	ImageDetail  string            `json:"image_detail"`
-	Thumbnail    string            `json:"thumbnail"`
-	ProductCode  string            `json:"product_code"`
-	Description  string            `json:"description"`
-	Discount     float32           `json:"discount"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-	CategoryId   string            `json:"category_id"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
-	Question     map[string]string `json:"question"`
+	Id           string              `json:"id"`
+	Name         string              `json:"name"`
+	Price        float32             `json:"price"`
+	Content      string              `json:"content"`
+	ImageDetail  string              `json:"image_detail"`
+	Thumbnail    string              `json:"thumbnail"`
+	ProductCode  string              `json:"product_code"`
+	Description  string              `json:"description"`
+	Discount     float32             `json:"discount"`
+	DiscountType enum.DiscountType   `json:"discount_type"`
+	CategoryId   string              `json:"category_id"`
+	CreatedAt    time.Time           `json:"created_at"`
+	UpdatedAt    time.Time           `json:"updated_at"`
+	Question     []map[string]string `json:"question"`
 }
 
 type ProductList struct {
-	Id           string            `json:"id"`
-	Name         string            `json:"name"`
-	Price        float64           `json:"price"`
-	Content      string            `json:"content"`
-	Thumbnail    string            `json:"thumbnail"`
-	Category     CategoryProduct   `json:"categories"`
-	Discount     float64           `json:"discount"`
-	DiscountType enum.DiscountType `json:"discount_type"`
-	ImageDetail  string            `json:"image_detail"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
-	Metadata     map[string]string `json:"metadata"`
-	Question     map[string]string `json:"question"`
+	Id           string              `json:"id"`
+	Name         string              `json:"name"`
+	Price        float64             `json:"price"`
+	Content      string              `json:"content"`
+	Thumbnail    string              `json:"thumbnail"`
+	Category     CategoryProduct     `json:"categories"`
+	Discount     float64             `json:"discount"`
+	DiscountType enum.DiscountType   `json:"discount_type"`
+	ImageDetail  string              `json:"image_detail"`
+	CreatedAt    time.Time           `json:"created_at"`
+	UpdatedAt    time.Time           `json:"updated_at"`
+	Metadata     map[string]string   `json:"metadata"`
+	Questions    []map[string]string `json:"questions"`
 }
 
 type CategoryProduct struct {
@@ -121,5 +121,5 @@ type ProductDetail struct {
 	ProductOptions  []ProductOptionResponse `json:"product_option_detail"`
 	ProductVariants []ProductVariant        `json:"product_variant_detail"`
 	Metadata        map[string]string       `json:"metadata"`
-	Question        map[string]string       `json:"question"`
+	Questions       []map[string]string     `json:"questions"`
 }

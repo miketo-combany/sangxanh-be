@@ -80,7 +80,7 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 	// 2. fetch the current page
 	var products []dto.ProductList
 	query := s.db.DB.From("products").
-		Select("id,name,price,content,image_detail,category_id,thumbnail,question,product_code,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select("id,name,price,content,image_detail,category_id,thumbnail,questions,product_code,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 
@@ -138,7 +138,7 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		Metadata:     req.Metadata,
 		Description:  req.Description,
 		ProductCode:  req.ProductCode,
-		Question:     req.Question,
+		Questions:    req.Questions,
 	}
 
 	err := s.validCategory(req.CategoryId)
@@ -163,7 +163,7 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 		"description":   req.Description,
 		"product_code":  req.ProductCode,
 		"discount_type": req.DiscountType,
-		"question":      req.Question,
+		"questions":     req.Questions,
 		"metadata":      req.Metadata,
 		"updated_at":    time.Now(),
 	}
@@ -215,7 +215,7 @@ func (s *productService) GetProductById(
 	var rows []dto.ProductDetail
 	if err := s.db.DB.
 		From("products").
-		Select("id,name,price,content,image_detail,description,product_code,question,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select("id,name,price,content,image_detail,description,product_code,questions,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		Eq("id", id).
 		IsNull("deleted_at").
 		Execute(&rows); err != nil {
