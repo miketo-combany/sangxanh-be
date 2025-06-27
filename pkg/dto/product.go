@@ -22,6 +22,7 @@ type Product struct {
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
 	DeletedAt    time.Time         `json:"deleted_at"`
+	Question     map[string]string `json:"question"`
 }
 
 type ProductCreated struct {
@@ -36,6 +37,7 @@ type ProductCreated struct {
 	ProductCode  string            `json:"product_code"`
 	Description  string            `json:"description"`
 	Metadata     map[string]string `json:"metadata"`
+	Question     map[string]string `json:"question"`
 }
 
 type ProductUpdated struct {
@@ -51,6 +53,7 @@ type ProductUpdated struct {
 	Discount     float32           `json:"discount"`
 	DiscountType enum.DiscountType `json:"discount_type"`
 	Metadata     map[string]string `json:"metadata"`
+	Question     map[string]string `json:"question"`
 }
 
 type ProductResponse struct {
@@ -67,6 +70,7 @@ type ProductResponse struct {
 	CategoryId   string            `json:"category_id"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
+	Question     map[string]string `json:"question"`
 }
 
 type ProductList struct {
@@ -82,6 +86,7 @@ type ProductList struct {
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
 	Metadata     map[string]string `json:"metadata"`
+	Question     map[string]string `json:"question"`
 }
 
 type CategoryProduct struct {
@@ -96,6 +101,7 @@ type ProductFilter struct {
 	IsDiscount  bool    `query:"is_discount"`
 	GreaterThan float64 `query:"greater_than"`
 	SmallerThan float64 `query:"smaller_than"`
+	ProductCode string  `query:"product_code"`
 }
 
 type ProductDetail struct {
@@ -115,4 +121,5 @@ type ProductDetail struct {
 	ProductOptions  []ProductOptionResponse `json:"product_option_detail"`
 	ProductVariants []ProductVariant        `json:"product_variant_detail"`
 	Metadata        map[string]string       `json:"metadata"`
+	Question        map[string]string       `json:"question"`
 }

@@ -20,6 +20,9 @@ type ProductService interface {
 	GetProductById(ctx context.Context, id string) (api.Response, error)
 }
 
+type ids struct {
+	Id string `json:"id"`
+}
 type productService struct {
 	db *supabase.Client
 }
@@ -49,6 +52,9 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 	if filter.IsDiscount {
 		q = q.Not().IsNull("discount")
 	}
+	if filter.ProductCode != "" {
+		q = q.Eq("product_code", filter.ProductCode)
+	}
 	if filter.GreaterThan > 0 {
 		q = q.Gt("price", strconv.FormatFloat(filter.GreaterThan, 'f', -1, 32))
 	}
@@ -74,7 +80,7 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 	// 2. fetch the current page
 	var products []dto.ProductList
 	query := s.db.DB.From("products").
-		Select("id,name,price,content,image_detail,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select("id,name,price,content,image_detail,category_id,thumbnail,question,product_code,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
 		IsNull("deleted_at")
 
@@ -83,14 +89,22 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		query = query.Like("name", encoded)
 	}
 
+	if filter.ProductCode != "" {
+		query = query.Eq("product_code", filter.ProductCode)
+	}
+
 	if filter.CategoryId != "" {
-		var categoryIds []string
+		var categoryIds []ids
 		err = s.db.DB.From("categories").Select("id").Eq("parent_id", filter.CategoryId).Execute(&categoryIds)
 		if err != nil {
 			return nil, err
 		}
-		categoryIds = append(categoryIds, filter.CategoryId)
-		query = query.In("category_id", categoryIds)
+		var cateIds []string
+		for _, id := range categoryIds {
+			cateIds = append(cateIds, id.Id)
+		}
+		cateIds = append(cateIds, filter.CategoryId)
+		query = query.In("category_id", cateIds)
 	}
 	if filter.IsDiscount {
 		query = query.Not().IsNull("discount")
@@ -124,6 +138,7 @@ func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		Metadata:     req.Metadata,
 		Description:  req.Description,
 		ProductCode:  req.ProductCode,
+		Question:     req.Question,
 	}
 
 	err := s.validCategory(req.CategoryId)
@@ -148,6 +163,7 @@ func (s *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 		"description":   req.Description,
 		"product_code":  req.ProductCode,
 		"discount_type": req.DiscountType,
+		"question":      req.Question,
 		"metadata":      req.Metadata,
 		"updated_at":    time.Now(),
 	}
@@ -199,7 +215,7 @@ func (s *productService) GetProductById(
 	var rows []dto.ProductDetail
 	if err := s.db.DB.
 		From("products").
-		Select("id,name,price,content,image_detail,description,product_code,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
+		Select("id,name,price,content,image_detail,description,product_code,question,category_id,thumbnail,discount,discount_type,categories!inner(id,name),created_at,updated_at").
 		Eq("id", id).
 		IsNull("deleted_at").
 		Execute(&rows); err != nil {
@@ -291,8 +307,8 @@ func (s *productService) GetProductById(
 	 *───────────────────────────────────────────────────────*/
 	product.ProductOptions = opts
 	product.ProductVariants = variants
-	product.MinPrice = float32(minPrice) + product.Price
-	product.MaxPrice = float32(maxPrice) + product.Price
+	product.MinPrice = float32(minPrice)
+	product.MaxPrice = float32(maxPrice)
 
 	return api.Success(product), nil
 }
