@@ -35,12 +35,12 @@ func (c *userController) Register(g *echo.Group) {
 	g = g.Group("/user")
 
 	g.GET("", c.List)
-	g.POST("/register", c.Create)
-	g.PUT("/update", c.Update, c.authMiddleware)
-	g.PUT("/address", c.Address, c.authMiddleware)
-	g.PUT("/change-password", c.ChangePassword, c.authMiddleware)
-	g.PUT("/send-magic-link", c.SendMagicLink)
-	g.PUT("/forgot-password", c.ForgotPassword, c.authMiddleware)
+	g.POST("/register", c.Create, middleware.RateLimiterMiddleware)
+	g.PUT("/update", c.Update, c.authMiddleware, middleware.RateLimiterMiddleware)
+	g.PUT("/address", c.Address, c.authMiddleware, middleware.RateLimiterMiddleware)
+	g.PUT("/change-password", c.ChangePassword, c.authMiddleware, middleware.RateLimiterMiddleware)
+	g.PUT("/send-magic-link", c.SendMagicLink, middleware.RateLimiterMiddleware)
+	g.PUT("/forgot-password", c.ForgotPassword, c.authMiddleware, middleware.RateLimiterMiddleware)
 	g.PUT("/update-status", c.UpdateStatus, c.authMiddleware, middleware.RequireRoles("admin"))
 
 	g.GET("/:id", c.GetById) // ← NEW

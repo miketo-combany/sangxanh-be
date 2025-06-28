@@ -24,9 +24,9 @@ func NewAuthController(di do.Injector, auth echo.MiddlewareFunc) (api.Controller
 
 func (c *authController) Register(g *echo.Group) {
 	g = g.Group("/auth")
-	g.POST("/login", c.Login)
-	g.POST("/refresh", c.Refresh)
-	g.GET("/current-user", c.CurrentUser, c.auth)
+	g.POST("/login", c.Login, middleware.RateLimiterMiddleware)
+	g.POST("/refresh", c.Refresh, middleware.RateLimiterMiddleware)
+	g.GET("/current-user", c.CurrentUser, c.auth, middleware.RateLimiterMiddleware)
 }
 
 func (c *authController) Login(e echo.Context) error {
