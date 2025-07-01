@@ -60,7 +60,7 @@ func (u *categoryService) ListCategoryById(ctx context.Context, categoryId strin
 	if len(cat.FavoProductIds) > 0 {
 		_ = u.db.DB.
 			From("products").
-			Select("id, name, thumbnail, price").
+			Select("id,name,thumbnail,price,category_id").
 			In("id", cat.FavoProductIds).
 			Eq("category_id", cat.Id).
 			IsNull("deleted_at").
@@ -258,11 +258,12 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		return nil, fmt.Errorf("category not found")
 	}
 
+	var products []dto.ProductShortInfo
 	if len(req.FavoProductIds) > 0 {
-		var products []dto.ProductShortInfo
+		log.Info(req.FavoProductIds)
 		err := u.db.DB.
 			From("products").
-			Select("id").
+			Select("*").
 			In("id", req.FavoProductIds).
 			Eq("category_id", req.Id).
 			IsNull("deleted_at").
@@ -294,6 +295,7 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"thumbnail":           req.Thumbnail,
 			"status":              req.Status,
 			"metadata":            req.Metadata,
+			"favo_product_ids":    req.FavoProductIds,
 			"description":         req.Description,
 			"is_display_homepage": req.IsDisplayHomepage,
 			"updated_at":          time.Now(),
@@ -308,6 +310,7 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 			"description":         req.Description,
 			"is_display_homepage": req.IsDisplayHomepage,
 			"updated_at":          time.Now(),
+			"favo_product_ids":    req.FavoProductIds,
 			"is_display_header":   req.IsDisplayHeader,
 			"is_sub_header":       req.IsSubHeader,
 			"icon":                req.Icon,
@@ -321,8 +324,25 @@ func (u *categoryService) UpdateCategory(ctx context.Context, req dto.CategoryUp
 		log.Errorf("Failed to update category %s: %v", req.Id, err)
 		return nil, fmt.Errorf("failed to update category")
 	}
+	cateUpdate := updateCategory[0]
+	cate := dto.CategoryResponse{
+		Id:                cateUpdate.Id,
+		Name:              cateUpdate.Name,
+		Thumbnail:         cateUpdate.Thumbnail,
+		Level:             cateUpdate.Level,
+		Icon:              cateUpdate.Icon,
+		Description:       cateUpdate.Description,
+		FavoProductIds:    cateUpdate.FavoProductIds,
+		FavoProducts:      products,
+		UpdatedAt:         cateUpdate.UpdatedAt,
+		CreatedAt:         cateUpdate.CreatedAt,
+		Metadata:          cateUpdate.Metadata,
+		IsDisplayHomepage: cateUpdate.IsDisplayHomepage,
+		IsDisplayHeader:   cateUpdate.IsDisplayHeader,
+		IsSubHeader:       cateUpdate.IsSubHeader,
+	}
 
-	return api.Success(updateCategory[0]), nil
+	return api.Success(cate), nil
 }
 
 func (u *categoryService) DeleteCategory(ctx context.Context, categoryId string) (api.Response, error) {

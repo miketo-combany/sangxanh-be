@@ -78,6 +78,7 @@ type ProductList struct {
 	Name         string              `json:"name"`
 	Price        float64             `json:"price"`
 	Content      string              `json:"content"`
+	ProductCode  string              `json:"product_code"`
 	Thumbnail    string              `json:"thumbnail"`
 	Category     CategoryProduct     `json:"categories"`
 	Discount     float64             `json:"discount"`
