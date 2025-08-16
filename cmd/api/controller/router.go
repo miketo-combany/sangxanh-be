@@ -19,6 +19,7 @@ func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc) error 
 		NewAuthController,
 		NewCartController,
 		NewOrderController,
+		NewVideoController,
 	}
 
 	for _, c := range controllers {

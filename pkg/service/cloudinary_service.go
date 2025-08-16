@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
-	"github.com/google/uuid"
 	"github.com/samber/do/v2"
 	"golang.org/x/sync/errgroup"
 	"mime/multipart"
@@ -51,8 +50,11 @@ func (s *imageService) UploadImages(ctx context.Context, files []*multipart.File
 			defer src.Close()
 
 			upParams := uploader.UploadParams{
-				Folder:   folder,
-				PublicID: uuid.NewString(), // random => no collisions
+				Folder:         folder,
+				PublicID:       fh.Filename,
+				UseFilename:    boolPtr(true),
+				UniqueFilename: boolPtr(false),
+				Overwrite:      boolPtr(true),
 			}
 
 			res, err := s.cld.Upload.Upload(gctx, src, upParams)
@@ -62,7 +64,7 @@ func (s *imageService) UploadImages(ctx context.Context, files []*multipart.File
 
 			meta[i] = imgMeta{
 				URL:      res.SecureURL,
-				PublicID: res.PublicID,
+				PublicID: fh.Filename,
 				Width:    res.Width,
 				Height:   res.Height,
 			}
@@ -76,3 +78,5 @@ func (s *imageService) UploadImages(ctx context.Context, files []*multipart.File
 
 	return api.Success(meta), nil
 }
+
+func boolPtr(b bool) *bool { return &b }
