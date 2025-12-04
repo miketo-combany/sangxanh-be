@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -43,8 +42,9 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 		IsNull("deleted_at") // keep soft‑deleted rows out
 	// Apply the same filter conditions
 	if filter.Name != "" {
-		encoded := url.QueryEscape("%" + filter.Name + "%")
-		q = q.Like("name", encoded)
+		// Use full-text search with plainto_tsquery for better search results
+		// This searches across the name field using PostgreSQL's FTS
+		q = q.Filter("name", "plfts", filter.Name)
 	}
 	if filter.CategoryId != "" {
 		q = q.Eq("category_id", filter.CategoryId)
@@ -85,8 +85,9 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 		IsNull("deleted_at")
 
 	if filter.Name != "" {
-		encoded := url.QueryEscape("%" + filter.Name + "%")
-		query = query.Like("name", encoded)
+		// Use full-text search with plainto_tsquery for better search results
+		// This searches across the name field using PostgreSQL's FTS
+		query = query.Filter("name", "plfts", filter.Name)
 	}
 
 	if filter.ProductCode != "" {
