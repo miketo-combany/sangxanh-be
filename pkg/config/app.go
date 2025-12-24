@@ -1,7 +1,7 @@
 package config
 
 type App struct {
-	Environment string `envconfig:"APP_ENV" default:"development"`
+	Environment string `envconfig:"APP_ENV" default:"prod"`
 }
 
 // IsDevelopment checks if the app is running in development mode
