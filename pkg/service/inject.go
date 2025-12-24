@@ -12,4 +12,5 @@ func Inject(di do.Injector) {
 	do.Provide(di, NewAuthService)
 	do.Provide(di, NewCartService)
 	do.Provide(di, NewOrderService)
+	do.Provide(di, NewShopService)
 }

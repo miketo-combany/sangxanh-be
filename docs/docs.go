@@ -9,16 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.sangxanh.com/support",
-            "email": "support@sangxanh.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -46,7 +37,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Current user information",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "401": {
@@ -86,7 +77,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -94,7 +85,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully authenticated",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.AuthResponse"
+                            "$ref": "#/definitions/dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -141,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.RefreshTokenRequest"
+                            "$ref": "#/definitions/dto.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -149,7 +140,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully refreshed token",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.AuthResponse"
+                            "$ref": "#/definitions/dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -200,7 +191,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.CartResponse"
+                                "$ref": "#/definitions/dto.CartResponse"
                             }
                         }
                     },
@@ -239,7 +230,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CartCreateRequest"
+                            "$ref": "#/definitions/dto.CartCreateRequest"
                         }
                     }
                 ],
@@ -247,7 +238,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created cart item",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CartResponse"
+                            "$ref": "#/definitions/dto.CartResponse"
                         }
                     },
                     "400": {
@@ -351,7 +342,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CartUpdate"
+                            "$ref": "#/definitions/dto.CartUpdate"
                         }
                     }
                 ],
@@ -359,7 +350,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated cart item",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CartResponse"
+                            "$ref": "#/definitions/dto.CartResponse"
                         }
                     },
                     "400": {
@@ -464,7 +455,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CategoryCreate"
+                            "$ref": "#/definitions/dto.CategoryCreate"
                         }
                     }
                 ],
@@ -472,7 +463,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created category",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CategoryResponse"
+                            "$ref": "#/definitions/dto.CategoryResponse"
                         }
                     },
                     "400": {
@@ -584,7 +575,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.CategoryListResponse"
+                                "$ref": "#/definitions/dto.CategoryListResponse"
                             }
                         }
                     },
@@ -623,7 +614,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CategoryUpdate"
+                            "$ref": "#/definitions/dto.CategoryUpdate"
                         }
                     }
                 ],
@@ -631,7 +622,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated category",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CategoryResponse"
+                            "$ref": "#/definitions/dto.CategoryResponse"
                         }
                     },
                     "400": {
@@ -691,7 +682,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Category details",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.CategoryResponse"
+                            "$ref": "#/definitions/dto.CategoryResponse"
                         }
                     },
                     "404": {
@@ -887,7 +878,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderCreate"
+                            "$ref": "#/definitions/dto.OrderCreate"
                         }
                     }
                 ],
@@ -895,7 +886,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created order",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailResponse"
+                            "$ref": "#/definitions/dto.OrderDetailResponse"
                         }
                     },
                     "400": {
@@ -992,7 +983,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderUpdate"
+                            "$ref": "#/definitions/dto.OrderUpdate"
                         }
                     }
                 ],
@@ -1000,7 +991,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated order",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailResponse"
+                            "$ref": "#/definitions/dto.OrderDetailResponse"
                         }
                     },
                     "400": {
@@ -1068,7 +1059,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated order",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailResponse"
+                            "$ref": "#/definitions/dto.OrderDetailResponse"
                         }
                     },
                     "400": {
@@ -1121,7 +1112,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Order details",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailResponse"
+                            "$ref": "#/definitions/dto.OrderDetailResponse"
                         }
                     },
                     "404": {
@@ -1233,7 +1224,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionResponse"
+                                "$ref": "#/definitions/dto.ProductOptionResponse"
                             }
                         }
                     },
@@ -1267,7 +1258,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionCreate"
+                            "$ref": "#/definitions/dto.ProductOptionCreate"
                         }
                     }
                 ],
@@ -1275,7 +1266,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created product option",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionResponse"
+                            "$ref": "#/definitions/dto.ProductOptionResponse"
                         }
                     },
                     "400": {
@@ -1308,7 +1299,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionCreateBulk"
+                            "$ref": "#/definitions/dto.ProductOptionCreateBulk"
                         }
                     }
                 ],
@@ -1318,7 +1309,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionResponse"
+                                "$ref": "#/definitions/dto.ProductOptionResponse"
                             }
                         }
                     },
@@ -1399,7 +1390,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionUpdate"
+                            "$ref": "#/definitions/dto.ProductOptionUpdate"
                         }
                     }
                 ],
@@ -1407,7 +1398,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated product option",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionResponse"
+                            "$ref": "#/definitions/dto.ProductOptionResponse"
                         }
                     },
                     "400": {
@@ -1447,7 +1438,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionBulkUpdate"
+                            "$ref": "#/definitions/dto.ProductOptionBulkUpdate"
                         }
                     }
                 ],
@@ -1457,7 +1448,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionResponse"
+                                "$ref": "#/definitions/dto.ProductOptionResponse"
                             }
                         }
                     },
@@ -1499,7 +1490,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantResponse"
+                                "$ref": "#/definitions/dto.ProductVariantResponse"
                             }
                         }
                     },
@@ -1533,7 +1524,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantCreate"
+                            "$ref": "#/definitions/dto.ProductVariantCreate"
                         }
                     }
                 ],
@@ -1541,7 +1532,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created product variant",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantResponse"
+                            "$ref": "#/definitions/dto.ProductVariantResponse"
                         }
                     },
                     "400": {
@@ -1574,7 +1565,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantCreateBulk"
+                            "$ref": "#/definitions/dto.ProductVariantCreateBulk"
                         }
                     }
                 ],
@@ -1584,7 +1575,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantResponse"
+                                "$ref": "#/definitions/dto.ProductVariantResponse"
                             }
                         }
                     },
@@ -1665,7 +1656,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantUpdate"
+                            "$ref": "#/definitions/dto.ProductVariantUpdate"
                         }
                     }
                 ],
@@ -1673,7 +1664,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated product variant",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantResponse"
+                            "$ref": "#/definitions/dto.ProductVariantResponse"
                         }
                     },
                     "400": {
@@ -1713,7 +1704,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantUpdateBulk"
+                            "$ref": "#/definitions/dto.ProductVariantUpdateBulk"
                         }
                     }
                 ],
@@ -1723,7 +1714,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantResponse"
+                                "$ref": "#/definitions/dto.ProductVariantResponse"
                             }
                         }
                     },
@@ -1762,7 +1753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductCreated"
+                            "$ref": "#/definitions/dto.ProductCreated"
                         }
                     }
                 ],
@@ -1770,7 +1761,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created product",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductResponse"
+                            "$ref": "#/definitions/dto.ProductResponse"
                         }
                     },
                     "400": {
@@ -1888,7 +1879,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductUpdated"
+                            "$ref": "#/definitions/dto.ProductUpdated"
                         }
                     }
                 ],
@@ -1896,7 +1887,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated product",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductResponse"
+                            "$ref": "#/definitions/dto.ProductResponse"
                         }
                     },
                     "400": {
@@ -1956,11 +1947,115 @@ const docTemplate = `{
                     "200": {
                         "description": "Product details",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ProductResponse"
+                            "$ref": "#/definitions/dto.ProductResponse"
                         }
                     },
                     "404": {
                         "description": "Product not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/shop": {
+            "get": {
+                "description": "Retrieve the shop information (only one shop record exists)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shop"
+                ],
+                "summary": "Get shop information",
+                "responses": {
+                    "200": {
+                        "description": "Shop information",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ShopResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Shop not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update the shop information (admin only, updates the first record)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shop"
+                ],
+                "summary": "Update shop information",
+                "parameters": [
+                    {
+                        "description": "Shop update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ShopUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated shop information",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ShopResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Shop not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -2059,7 +2154,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserUpdateAddressRequest"
+                            "$ref": "#/definitions/dto.UserUpdateAddressRequest"
                         }
                     }
                 ],
@@ -2067,7 +2162,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated user with new addresses",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
@@ -2119,7 +2214,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ChangePassword"
+                            "$ref": "#/definitions/dto.ChangePassword"
                         }
                     }
                 ],
@@ -2180,7 +2275,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ResetPasswordRequest"
+                            "$ref": "#/definitions/dto.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -2229,7 +2324,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserRegisterRequest"
+                            "$ref": "#/definitions/dto.UserRegisterRequest"
                         }
                     }
                 ],
@@ -2237,7 +2332,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created user",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
@@ -2277,7 +2372,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.ResetPasswordRequest"
+                            "$ref": "#/definitions/dto.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -2331,7 +2426,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserUpdateRequest"
+                            "$ref": "#/definitions/dto.UserUpdateRequest"
                         }
                     }
                 ],
@@ -2339,7 +2434,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated user",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
@@ -2391,7 +2486,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserUpdateData"
+                            "$ref": "#/definitions/dto.UserUpdateData"
                         }
                     }
                 ],
@@ -2399,7 +2494,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Updated user",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
@@ -2452,7 +2547,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User information",
                         "schema": {
-                            "$ref": "#/definitions/SangXanh_pkg_dto.UserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "404": {
@@ -2467,7 +2562,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "SangXanh_pkg_dto.Address": {
+        "dto.Address": {
             "type": "object",
             "properties": {
                 "address_json": {
@@ -2484,7 +2579,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.AuthResponse": {
+        "dto.AuthResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -2495,7 +2590,24 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CartCreateRequest": {
+        "dto.Branch": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "hotline": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CartCreateRequest": {
             "type": "object",
             "properties": {
                 "product_option_id": {
@@ -2509,7 +2621,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CartResponse": {
+        "dto.CartResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2522,7 +2634,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "product_option": {
-                    "$ref": "#/definitions/SangXanh_pkg_dto.ProductOption"
+                    "$ref": "#/definitions/dto.ProductOption"
                 },
                 "product_option_id": {
                     "type": "string"
@@ -2538,7 +2650,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CartUpdate": {
+        "dto.CartUpdate": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2549,7 +2661,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.Category": {
+        "dto.Category": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2606,7 +2718,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CategoryCreate": {
+        "dto.CategoryCreate": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2651,13 +2763,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CategoryListResponse": {
+        "dto.CategoryListResponse": {
             "type": "object",
             "properties": {
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.CategoryListResponse"
+                        "$ref": "#/definitions/dto.CategoryListResponse"
                     }
                 },
                 "created_at": {
@@ -2675,7 +2787,7 @@ const docTemplate = `{
                 "favo_products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductShortInfo"
+                        "$ref": "#/definitions/dto.ProductShortInfo"
                     }
                 },
                 "icon": {
@@ -2707,7 +2819,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/SangXanh_pkg_enum.Status"
+                    "$ref": "#/definitions/enum.Status"
                 },
                 "thumbnail": {
                     "type": "string"
@@ -2717,13 +2829,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CategoryResponse": {
+        "dto.CategoryResponse": {
             "type": "object",
             "properties": {
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.Category"
+                        "$ref": "#/definitions/dto.Category"
                     }
                 },
                 "created_at": {
@@ -2741,7 +2853,7 @@ const docTemplate = `{
                 "favo_products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductShortInfo"
+                        "$ref": "#/definitions/dto.ProductShortInfo"
                     }
                 },
                 "icon": {
@@ -2770,7 +2882,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/SangXanh_pkg_enum.Status"
+                    "$ref": "#/definitions/enum.Status"
                 },
                 "thumbnail": {
                     "type": "string"
@@ -2780,7 +2892,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.CategoryUpdate": {
+        "dto.CategoryUpdate": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2825,7 +2937,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ChangePassword": {
+        "dto.ChangePassword": {
             "type": "object",
             "properties": {
                 "new_password": {
@@ -2836,7 +2948,18 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.LoginRequest": {
+        "dto.Contact": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2850,7 +2973,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.OrderCreate": {
+        "dto.OrderCreate": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2863,7 +2986,7 @@ const docTemplate = `{
                 "order_details": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailBase"
+                        "$ref": "#/definitions/dto.OrderDetailBase"
                     }
                 },
                 "status": {
@@ -2874,7 +2997,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.OrderDetail": {
+        "dto.OrderDetail": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2903,7 +3026,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "product_options": {
-                    "$ref": "#/definitions/SangXanh_pkg_dto.ProductOption"
+                    "$ref": "#/definitions/dto.ProductOption"
                 },
                 "quantity": {
                     "type": "integer"
@@ -2913,7 +3036,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.OrderDetailBase": {
+        "dto.OrderDetailBase": {
             "type": "object",
             "properties": {
                 "discount": {
@@ -2940,7 +3063,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.OrderDetailResponse": {
+        "dto.OrderDetailResponse": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2959,7 +3082,7 @@ const docTemplate = `{
                 "order_detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetail"
+                        "$ref": "#/definitions/dto.OrderDetail"
                     }
                 },
                 "status": {
@@ -2973,7 +3096,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.OrderUpdate": {
+        "dto.OrderUpdate": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2989,7 +3112,7 @@ const docTemplate = `{
                 "order_details": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.OrderDetailBase"
+                        "$ref": "#/definitions/dto.OrderDetailBase"
                     }
                 },
                 "user_id": {
@@ -2997,7 +3120,18 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.Product": {
+        "dto.Policy": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Product": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -3059,7 +3193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductCreated": {
+        "dto.ProductCreated": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -3109,7 +3243,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOption": {
+        "dto.ProductOption": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3118,7 +3252,7 @@ const docTemplate = `{
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionDetail"
+                        "$ref": "#/definitions/dto.ProductOptionDetail"
                     }
                 },
                 "id": {
@@ -3147,13 +3281,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionBulkUpdate": {
+        "dto.ProductOptionBulkUpdate": {
             "type": "object",
             "properties": {
                 "options": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionUpdate"
+                        "$ref": "#/definitions/dto.ProductOptionUpdate"
                     }
                 },
                 "product_id": {
@@ -3161,13 +3295,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionCreate": {
+        "dto.ProductOptionCreate": {
             "type": "object",
             "properties": {
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionDetail"
+                        "$ref": "#/definitions/dto.ProductOptionDetail"
                     }
                 },
                 "metadata": {
@@ -3190,13 +3324,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionCreateBulk": {
+        "dto.ProductOptionCreateBulk": {
             "type": "object",
             "properties": {
                 "options": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionCreate"
+                        "$ref": "#/definitions/dto.ProductOptionCreate"
                     }
                 },
                 "product_id": {
@@ -3204,7 +3338,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionDetail": {
+        "dto.ProductOptionDetail": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3215,7 +3349,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionResponse": {
+        "dto.ProductOptionResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3224,7 +3358,7 @@ const docTemplate = `{
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionVariantDetail"
+                        "$ref": "#/definitions/dto.ProductOptionVariantDetail"
                     }
                 },
                 "id": {
@@ -3253,13 +3387,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionUpdate": {
+        "dto.ProductOptionUpdate": {
             "type": "object",
             "properties": {
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductOptionDetail"
+                        "$ref": "#/definitions/dto.ProductOptionDetail"
                     }
                 },
                 "id": {
@@ -3285,7 +3419,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductOptionVariantDetail": {
+        "dto.ProductOptionVariantDetail": {
             "type": "object",
             "properties": {
                 "variant_id": {
@@ -3300,7 +3434,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductResponse": {
+        "dto.ProductResponse": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -3353,7 +3487,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductShortInfo": {
+        "dto.ProductShortInfo": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -3373,7 +3507,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductUpdated": {
+        "dto.ProductUpdated": {
             "type": "object",
             "properties": {
                 "category_id": {
@@ -3426,13 +3560,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantCreate": {
+        "dto.ProductVariantCreate": {
             "type": "object",
             "properties": {
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantDetail"
+                        "$ref": "#/definitions/dto.ProductVariantDetail"
                     }
                 },
                 "metadata": {
@@ -3447,7 +3581,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantCreateBulk": {
+        "dto.ProductVariantCreateBulk": {
             "type": "object",
             "properties": {
                 "product_id": {
@@ -3456,12 +3590,12 @@ const docTemplate = `{
                 "variants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantCreate"
+                        "$ref": "#/definitions/dto.ProductVariantCreate"
                     }
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantDetail": {
+        "dto.ProductVariantDetail": {
             "type": "object",
             "properties": {
                 "name": {
@@ -3472,7 +3606,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantResponse": {
+        "dto.ProductVariantResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3481,7 +3615,7 @@ const docTemplate = `{
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantDetail"
+                        "$ref": "#/definitions/dto.ProductVariantDetail"
                     }
                 },
                 "id": {
@@ -3495,20 +3629,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "products": {
-                    "$ref": "#/definitions/SangXanh_pkg_dto.Product"
+                    "$ref": "#/definitions/dto.Product"
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantUpdate": {
+        "dto.ProductVariantUpdate": {
             "type": "object",
             "properties": {
                 "detail": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantDetail"
+                        "$ref": "#/definitions/dto.ProductVariantDetail"
                     }
                 },
                 "id": {
@@ -3523,7 +3657,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ProductVariantUpdateBulk": {
+        "dto.ProductVariantUpdateBulk": {
             "type": "object",
             "properties": {
                 "product_id": {
@@ -3532,12 +3666,12 @@ const docTemplate = `{
                 "variants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.ProductVariantUpdate"
+                        "$ref": "#/definitions/dto.ProductVariantUpdate"
                     }
                 }
             }
         },
-        "SangXanh_pkg_dto.RefreshTokenRequest": {
+        "dto.RefreshTokenRequest": {
             "type": "object",
             "properties": {
                 "refresh_token": {
@@ -3545,7 +3679,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.ResetPasswordRequest": {
+        "dto.ResetPasswordRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -3553,13 +3687,92 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.UserInfo": {
+        "dto.Shop": {
+            "type": "object",
+            "properties": {
+                "branches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Branch"
+                    }
+                },
+                "contact": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Contact"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "hotline": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "policies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Policy"
+                    }
+                }
+            }
+        },
+        "dto.ShopResponse": {
+            "type": "object",
+            "properties": {
+                "shop": {
+                    "$ref": "#/definitions/dto.Shop"
+                }
+            }
+        },
+        "dto.ShopUpdate": {
+            "type": "object",
+            "required": [
+                "branches",
+                "contact",
+                "hotline",
+                "name",
+                "policies"
+            ],
+            "properties": {
+                "branches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Branch"
+                    }
+                },
+                "contact": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Contact"
+                    }
+                },
+                "hotline": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "policies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Policy"
+                    }
+                }
+            }
+        },
+        "dto.UserInfo": {
             "type": "object",
             "properties": {
                 "address": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.Address"
+                        "$ref": "#/definitions/dto.Address"
                     }
                 },
                 "avatar": {
@@ -3584,14 +3797,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/SangXanh_pkg_enum.Status"
+                    "$ref": "#/definitions/enum.Status"
                 },
                 "username": {
                     "type": "string"
                 }
             }
         },
-        "SangXanh_pkg_dto.UserRegisterRequest": {
+        "dto.UserRegisterRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3623,13 +3836,13 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.UserUpdateAddressRequest": {
+        "dto.UserUpdateAddressRequest": {
             "type": "object",
             "properties": {
                 "address": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SangXanh_pkg_dto.Address"
+                        "$ref": "#/definitions/dto.Address"
                     }
                 },
                 "id": {
@@ -3637,18 +3850,18 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_dto.UserUpdateData": {
+        "dto.UserUpdateData": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/SangXanh_pkg_enum.Status"
+                    "$ref": "#/definitions/enum.Status"
                 }
             }
         },
-        "SangXanh_pkg_dto.UserUpdateRequest": {
+        "dto.UserUpdateRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -3683,7 +3896,7 @@ const docTemplate = `{
                 }
             }
         },
-        "SangXanh_pkg_enum.Status": {
+        "enum.Status": {
             "type": "string",
             "enum": [
                 "active",
@@ -3694,25 +3907,17 @@ const docTemplate = `{
                 "Inactive"
             ]
         }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/api",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "SangXanh API",
-	Description:      "This is the SangXanh API server.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
