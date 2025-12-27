@@ -26,6 +26,17 @@ func (c *videoController) Register(g *echo.Group) {
 	g.POST("/upload", c.Upload)
 }
 
+// Upload godoc
+// @Summary Upload files/videos
+// @Description Upload one or multiple files (videos, documents, etc.) to Cloudinary
+// @Tags Files
+// @Accept multipart/form-data
+// @Produce json
+// @Param files formData file true "Files to upload (multiple files supported)"
+// @Param folder formData string false "Cloudinary folder path"
+// @Success 200 {object} map[string]interface{} "Upload successful with file URLs"
+// @Failure 400 {object} map[string]interface{} "Invalid request or no file uploaded"
+// @Router /file/upload [post]
 func (c *videoController) Upload(e echo.Context) error {
 	// Parse the whole multipart form once. Echo re‑uses http.Request.ParseMultipartForm
 	// so this is cached and cheap even for many fields.

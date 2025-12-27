@@ -400,3 +400,21 @@ type PublicAuditTrailsUpdate struct {
   Metadata     []interface{}  `json:"metadata"`
   UpdatedAt    sql.NullString `json:"updated_at"`
 }
+
+type PublicShopSelect struct {
+  Id        int64       `json:"id"`
+  CreatedAt string      `json:"created_at"`
+  Name      string      `json:"name"`
+  Hotline   string      `json:"hotline"`
+  Branches  interface{} `json:"branches"`
+  Policies  interface{} `json:"policies"`
+  Contact   interface{} `json:"contact"`
+}
+
+type PublicShopUpdate struct {
+  Name     sql.NullString `json:"name"`
+  Hotline  sql.NullString `json:"hotline"`
+  Branches interface{}    `json:"branches"`
+  Policies interface{}    `json:"policies"`
+  Contact  interface{}    `json:"contact"`
+}

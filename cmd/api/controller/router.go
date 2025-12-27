@@ -2,11 +2,13 @@ package controller
 
 import (
 	"SangXanh/pkg/common/api"
+
 	"github.com/labstack/echo/v4"
 	"github.com/samber/do/v2"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc) error {
+func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc, enableSwagger bool) error {
 	type controllerWithMiddleware func(di do.Injector, auth echo.MiddlewareFunc) (api.Controller, error)
 
 	controllers := []controllerWithMiddleware{
@@ -20,6 +22,7 @@ func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc) error 
 		NewCartController,
 		NewOrderController,
 		NewVideoController,
+		NewShopController,
 	}
 
 	for _, c := range controllers {
@@ -29,5 +32,11 @@ func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc) error 
 		}
 		ctrl.Register(e)
 	}
+
+	// Register Swagger endpoint only in non-production environments
+	if enableSwagger {
+		e.GET("/swagger/*", echoSwagger.WrapHandler)
+	}
+
 	return nil
 }
