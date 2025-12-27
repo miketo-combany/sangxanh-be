@@ -1,25 +1,34 @@
 # --- Stage 1: Build ---
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24rc1-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git ca-certificates
 
-# Chỉ copy go.mod và go.sum trước để cache được layer go mod tidy
-COPY go.mod go.sum ./
-RUN go mod tidy
+# Copy go.mod and go.sum for dependency caching
+COPY go.mod ./
+COPY go.sum* ./
+RUN go mod download
 
+# Copy the rest of the application
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o SangXanh ./cmd/api/main.go
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o SangXanh ./cmd/api/main.go
 
 # --- Stage 2: Run ---
 FROM alpine:latest
 
 WORKDIR /root/
 
-# Copy binary and .env file
+# Install ca-certificates for HTTPS connections
+RUN apk --no-cache add ca-certificates
+
+# Copy binary from builder
 COPY --from=builder /app/SangXanh .
+
+# Copy .env file if it exists (optional)
+COPY .env* ./ 
 
 EXPOSE 8080
 
