@@ -13,10 +13,8 @@ WORKDIR /root/
 COPY --from=builder /app/SangXanh .
 
 # Cloud Run will set PORT environment variable
-# Map it to SERVER_PORT that the app expects
 ENV SERVER_HOST=0.0.0.0
 EXPOSE 8080
 
-# Use shell form to handle PORT environment variable
-CMD SERVER_PORT=${PORT:-8080} ./SangXanh
+CMD ["./SangXanh"]
 
