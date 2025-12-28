@@ -1,10 +1,6 @@
 # --- Stage 1: Build ---
-<<<<<<< HEAD
 FROM golang:1.23-alpine AS builder
 ENV GOTOOLCHAIN=auto
-=======
-FROM golang:1.24rc1-alpine AS builder
->>>>>>> d8183713113ddbe7778353f0b99d87721514a676
 
 WORKDIR /app
 
