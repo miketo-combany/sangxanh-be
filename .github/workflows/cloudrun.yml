@@ -61,15 +61,20 @@ jobs:
           docker tag $(docker images -q sangxanh-be-app) "$IMAGE"
           docker push "$IMAGE"
 
-      # Deploy to VM instance
-      - name: Deploy to VM instance
+      - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+
+      - name: Add host to known_hosts
+        run: |
           ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      # Deploy to VM instance
+      - name: Deploy to VM instance
+        run: |
           
-          # Deploy on VM
           ssh -i ~/.ssh/id_rsa ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
             gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
             sudo docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
