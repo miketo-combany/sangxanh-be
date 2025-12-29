@@ -12,6 +12,8 @@ env:
   REPOSITORY: sangxanh-be        # Artifact Registry repo name
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
   SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
+  VM_NAME: ${{ secretes.VM_NAME }}
+  VM_REGION: ${{ secrets.GCP_REGION }}
 
 jobs:
   deploy:
@@ -59,14 +61,21 @@ jobs:
           docker tag $(docker images -q sangxanh-be-app) "$IMAGE"
           docker push "$IMAGE"
 
-      # Deploy to Cloud Run
-      - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
-
-      - name: Show Cloud Run URL
+      # SSH to VM instance
+      - name: SSH to VM instance
         run: |
-          echo "Service URL: ${{ steps.deploy.outputs.url }}"
+          gcloud compute ssh ${{ env.VM_NAME }} \
+            --zone=${{ env.VM_ZONE }} \
+            --command="
+              echo 'Connected to VM';
+              docker ps;
+              docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }};
+              docker stop sangxanh-be || true;
+              docker rm sangxanh-be || true;
+              docker run -d \
+                --name sangxanh-be \
+                --env-file .env \
+                -p 8080:8080 \
+                ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+            "
+
