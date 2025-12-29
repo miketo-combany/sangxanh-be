@@ -12,7 +12,7 @@ env:
   REPOSITORY: sangxanh-be        # Artifact Registry repo name
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
   SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
-  VM_NAME: ${{ secretes.VM_NAME }}
+  VM_NAME: ${{ secrets.VM_NAME }}
   VM_REGION: ${{ secrets.GCP_REGION }}
 
 jobs:
