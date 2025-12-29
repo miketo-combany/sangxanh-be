@@ -61,20 +61,29 @@ jobs:
           docker tag $(docker images -q sangxanh-be-app) "$IMAGE"
           docker push "$IMAGE"
 
-      # SSH to VM instance
-      - name: SSH to VM instance
+      # Deploy to VM instance
+      - name: Deploy to VM instance
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
-          ssh -i ~/.ssh/id_rsa ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}
-      
-      - name: Deploy on VM
-        run: |
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+          
+          # Deploy on VM
+          ssh -i ~/.ssh/id_rsa ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+            gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
             docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
             docker stop sangxanh-be || true
             docker rm sangxanh-be || true
             docker run -d \
               --name sangxanh-be \
-              --env-file .env \
+              -e APP_ENV=prod \
+              -e SERVER_PORT=${{ secrets.SERVER_PORT }} \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e DATABASE_KEY="${{ secrets.DATABASE_KEY }}" \
+              -e CLOUDINARY_URL="${{ secrets.CLOUDINARY_URL }}" \
+              -e JWT_KEY="${{ secrets.JWT_KEY }}" \
               -p 8080:8080 \
+              --restart unless-stopped \
               ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          EOF
