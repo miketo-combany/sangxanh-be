@@ -64,7 +64,7 @@ jobs:
       # SSH to VM instance
       - name: SSH to VM instance
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}
       
       - name: Deploy on VM
         run: |
