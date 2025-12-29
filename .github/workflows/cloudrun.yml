@@ -64,7 +64,9 @@ jobs:
       # SSH to VM instance
       - name: SSH to VM instance
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          ssh -i ~/.ssh/id_rsa ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}
       
       - name: Deploy on VM
         run: |
