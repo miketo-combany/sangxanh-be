@@ -63,19 +63,17 @@ jobs:
 
       # SSH to VM instance
       - name: SSH to VM instance
-        run: |
-          gcloud compute ssh ${{ env.VM_NAME }} \
-            --zone=${{ env.VM_ZONE }} \
-            --command="
-              echo 'Connected to VM';
-              docker ps;
-              docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }};
-              docker stop sangxanh-be || true;
-              docker rm sangxanh-be || true;
-              docker run -d \
-                --name sangxanh-be \
-                --env-file .env \
-                -p 8080:8080 \
-                ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
-            "
-
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+            docker stop sangxanh-be || true
+            docker rm sangxanh-be || true
+            docker run -d \
+              --name sangxanh-be \
+              --env-file .env \
+              -p 8080:8080 \
+              ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
