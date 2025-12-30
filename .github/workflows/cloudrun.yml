@@ -71,12 +71,14 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
+        env: 
+          IMAGE: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}
         with:
           context: ./
           file: ./Dockerfile
           push: true
           platforms: linux/amd64
-          tags: ${{ env.IMAGE }}
+          tags: ${{ env.SERVICE }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=registry,ref=${{ env.IMAGE }},mode=max
 
