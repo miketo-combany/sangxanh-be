@@ -1,5 +1,9 @@
 name: Build and Deploy to Cloud Run
 
+concurrency:
+  group: cloudrun-deploy
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -9,15 +13,18 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: ${{ secrets.GCP_REGION }}
   SERVICE: sangxanh-be
-  REPOSITORY: sangxanh-be        # Artifact Registry repo name
+  REPOSITORY: sangxanh-container
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
   SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
-  VM_NAME: ${{ secrets.VM_NAME }}
   VM_REGION: ${{ secrets.GCP_REGION }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_REGISTRY: ${{ env.REGION }}-docker.pkg.dev
+      IMAGE_TAG: ${{ github.sha }}
+      IMAGE: ${{ env.IMAGE_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ env.IMAGE_TAG }}
 
     permissions:
       contents: read
@@ -27,7 +34,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Create .env file from GitHub Secrets
       - name: Create .env file
         run: |
           cat > .env << EOF
@@ -39,7 +45,6 @@ jobs:
           JWT_KEY=${{ secrets.JWT_KEY }}
           EOF
 
-      # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v2
@@ -48,18 +53,28 @@ jobs:
           service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
           project_id: ${{ env.PROJECT_ID }}
 
-      # Configure Docker to use Artifact Registry
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          install_components: gke-gcloud-auth-plugin
+
       - name: Configure Docker
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      # Build and push Docker image using Docker Compose
-      - name: Build and Push Docker Image
-        run: |
-          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
-          docker compose build
-          docker tag $(docker images -q sangxanh-be-app) "$IMAGE"
-          docker push "$IMAGE"
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=registry,ref=${{ env.IMAGE }},mode=max
 
       - name: Setup SSH Key
         run: |
@@ -76,7 +91,7 @@ jobs:
         run: |
           
           ssh -i ~/.ssh/id_rsa ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
-            gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+            sudo gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
             sudo docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
             sudo docker stop sangxanh-be || true
             sudo docker rm sangxanh-be || true
