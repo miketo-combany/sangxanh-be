@@ -21,10 +21,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_REGISTRY: ${{ env.REGION }}-docker.pkg.dev
-      IMAGE_TAG: ${{ github.sha }}
-      IMAGE: ${{ env.IMAGE_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ env.IMAGE_TAG }}
+    # IMAGE_* variables are exported via the Prepare Image stage below
 
     permissions:
       contents: read
@@ -62,6 +59,12 @@ jobs:
       - name: Configure Docker
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Prepare image variables
+        run: |
+          echo "IMAGE_REGISTRY=${{ env.REGION }}-docker.pkg.dev" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+          echo "IMAGE=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
