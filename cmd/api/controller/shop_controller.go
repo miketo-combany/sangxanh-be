@@ -23,7 +23,7 @@ func NewShopController(di do.Injector, authMiddleware echo.MiddlewareFunc) (api.
 }
 
 func (c *shopController) Register(g *echo.Group) {
-	g = g.Group("/shop-a")
+	g = g.Group("/shop")
 	g.GET("", c.GetShop)
 	g.PUT("", c.UpdateShop, c.authMiddleware, middleware.RequireRoles("admin"))
 }
