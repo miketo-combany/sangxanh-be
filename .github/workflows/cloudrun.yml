@@ -1,4 +1,4 @@
-name: Build and Deploy to Cloud Run
+name: Build and Deploy to GCP VM
 
 concurrency:
   group: cloudrun-deploy
