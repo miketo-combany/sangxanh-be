@@ -8,6 +8,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o SangXanh ./cmd/api/main.go
 
 # --- Stage 2: Run ---
 FROM alpine:latest
+
+# Install wget for health checks
+RUN apk --no-cache add wget
+
 WORKDIR /app
 COPY --from=builder /app/SangXanh .
 
