@@ -12,6 +12,7 @@ jobs:
         uses: and-fm/cloudflared-ssh-action@v3
         with:
           host: ${{ secrets.SSH_HOST }}
+          port: 22
           username: ${{ secrets.SSH_USERNAME }}
           private_key_filename: ${{ secrets.SSH_PRIVATE_KEY_FILENAME }}
           private_key_value: ${{ secrets.SSH_PRIVATE_KEY_VALUE }}
