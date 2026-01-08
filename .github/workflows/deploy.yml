@@ -16,7 +16,6 @@ jobs:
           # If your server requires a login password OR your key has a passphrase:
           password: ${{ secrets.SSH_PASSWORD }} 
           script: |
-            whoami
-            ls -al
+            mkdir hello
        
     
