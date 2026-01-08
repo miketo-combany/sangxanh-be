@@ -4,18 +4,19 @@ on:
     branches:
       - main
 jobs:
-  ssh_command:
-    name: Run SSH command
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect and run command on remote server
-        uses: and-fm/cloudflared-ssh-action@v3
+      - name: Executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ssh-companylab.khuyen.blog
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          private_key_filename: ${{ secrets.SSH_PRIVATE_KEY_FILENAME }}
-          private_key_value: ${{ secrets.SSH_PRIVATE_KEY_VALUE }}
-          port: 80
-          service_token_id: ${{ secrets.SERVICE_TOKEN_ID }}
-          service_token_secret: ${{ secrets.SERVICE_TOKEN_SECRET }}
-          commands: mkdir hello-world-1 -v
+          key: ${{ secrets.SSH_PRIVATE_KEY_VALUE }}
+          # If your server requires a login password OR your key has a passphrase:
+          password: ${{ secrets.SSH_PASSWORD }} 
+          script: |
+            whoami
+            ls -al
+       
+    
