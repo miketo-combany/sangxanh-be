@@ -1,21 +1,31 @@
 name: Run command on remote server
+
 on:
+
   push:
+
     branches:
+
       - main
+
 jobs:
+
   deploy:
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_VALUE }}
-          # If your server requires a login password OR your key has a passphrase:
-          password: ${{ secrets.SSH_PASSWORD }} 
-          script: |
-            mkdir hello
-       
-    
+
+      - name: SSH
+
+        run: |
+
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.SSH_PRIVATE_KEY_VALUE }}" > ~/.ssh/id_rsa
+
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
+
+          mkdir hello-w
