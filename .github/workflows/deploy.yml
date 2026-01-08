@@ -11,7 +11,7 @@ jobs:
       - name: Connect and run command on remote server
         uses: and-fm/cloudflared-ssh-action@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ssh-companylab.khuyen.blog
           port: 22
           username: ${{ secrets.SSH_USERNAME }}
           private_key_filename: ${{ secrets.SSH_PRIVATE_KEY_FILENAME }}
