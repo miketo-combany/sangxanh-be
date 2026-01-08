@@ -12,10 +12,10 @@ jobs:
         uses: and-fm/cloudflared-ssh-action@v3
         with:
           host: ssh-companylab.khuyen.blog
-          port: 22
           username: ${{ secrets.SSH_USERNAME }}
           private_key_filename: ${{ secrets.SSH_PRIVATE_KEY_FILENAME }}
           private_key_value: ${{ secrets.SSH_PRIVATE_KEY_VALUE }}
+          port: 22
           service_token_id: ${{ secrets.SERVICE_TOKEN_ID }}
           service_token_secret: ${{ secrets.SERVICE_TOKEN_SECRET }}
           commands: mkdir hello-world-1 -v
