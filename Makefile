@@ -35,6 +35,7 @@ docker-restart:
 docker-clean:
 	docker compose down -v
 	docker system prune -f
+	docker rmi sangxanh-be-app -f
 
 # Docker commands - Development (with hot reload)
 docker-dev:

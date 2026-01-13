@@ -67,19 +67,19 @@ func SyncData(di do.Injector) {
 	var meiliDocs []map[string]interface{}
 	for _, p := range products {
 		doc := map[string]interface{}{
-			"id":    p.Id,
-			"name":  p.Name,
-			"price": p.Price,
-			// "content":       p.Content,
-			// "description":   p.Description,
-			// "category_id":   p.CategoryId,
-			// "thumbnail":     p.Thumbnail,
-			// "image_detail":  p.ImageDetail,
-			// "discount":      p.Discount,
-			// "discount_type": p.DiscountType,
-			// "product_code":  p.ProductCode,
-			// "metadata":      p.Metadata,
-			// "questions":     p.Questions,
+			"id":            p.Id,
+			"name":          p.Name,
+			"price":         p.Price,
+			"content":       p.Content,
+			"description":   p.Description,
+			"category_id":   p.CategoryId,
+			"thumbnail":     p.Thumbnail,
+			"image_detail":  p.ImageDetail,
+			"discount":      p.Discount,
+			"discount_type": p.DiscountType,
+			"product_code":  p.ProductCode,
+			"metadata":      p.Metadata,
+			"questions":     p.Questions,
 		}
 		meiliDocs = append(meiliDocs, doc)
 	}
@@ -88,13 +88,13 @@ func SyncData(di do.Injector) {
 		PrimaryKey: &id,
 	})
 
-	// updateIndexTask, err := meilisearchClient.Index("products").UpdateFilterableAttributes(&[]interface{}{
-	// 	"category_id",
-	// 	"discount",
-	// 	"price",
-	// 	"discount_type",
-	// 	"product_code",
-	// })
+	updateIndexTask, err := meilisearchClient.Index("products").UpdateFilterableAttributes(&[]interface{}{
+		"category_id",
+		"discount",
+		"price",
+		"discount_type",
+		"product_code",
+	})
 
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +102,7 @@ func SyncData(di do.Injector) {
 	}
 
 	fmt.Println("Init task, ", task.TaskUID)
-	// fmt.Println("Update filterable attributes task, ", updateIndexTask.TaskUID)
+	fmt.Println("Update filterable attributes task, ", updateIndexTask.TaskUID)
 
 	log.Info("Sync completed successfully")
 }
