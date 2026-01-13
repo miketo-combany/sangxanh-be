@@ -7,13 +7,14 @@ import (
 	"SangXanh/pkg/log"
 	"context"
 	"fmt"
+	"net/url"
+	"sort"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/nedpals/supabase-go"
 	"github.com/samber/do/v2"
 	"github.com/samber/lo"
-	"net/url"
-	"sort"
-	"time"
 )
 
 type CategoryService interface {
@@ -23,6 +24,7 @@ type CategoryService interface {
 	UpdateCategory(ctx context.Context, req dto.CategoryUpdate) (api.Response, error)
 	DeleteCategory(ctx context.Context, categoryId string) (api.Response, error)
 	ListCategoryById(ctx context.Context, categoryId string) (api.Response, error)
+	GetCategoryDescendants(ctx context.Context, categoryId string) ([]string, error)
 }
 
 type categoryService struct {
@@ -465,4 +467,35 @@ func (u *categoryService) ListHeaderCategories(ctx context.Context) (api.Respons
 	}
 
 	return api.Success(result), nil
+}
+
+func (u *categoryService) GetCategoryDescendants(ctx context.Context, categoryId string) ([]string, error) {
+	// Fetch all categories (id, parent_id) to build the tree
+	var categories []dto.Category
+	err := u.db.DB.From("categories").Select("id,parent_id").IsNull("deleted_at").Execute(&categories)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch categories: %w", err)
+	}
+
+	childMap := make(map[string][]string)
+	for _, c := range categories {
+		if c.ParentId != "" {
+			childMap[c.ParentId] = append(childMap[c.ParentId], c.Id)
+		}
+	}
+
+	var descendants []string
+	queue := []string{categoryId}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		if children, ok := childMap[curr]; ok {
+			descendants = append(descendants, children...)
+			queue = append(queue, children...)
+		}
+	}
+
+	return descendants, nil
 }
