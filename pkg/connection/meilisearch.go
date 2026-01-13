@@ -1,8 +1,6 @@
-package main
+package connection
 
 import (
-	"SangXanh/pkg/config"
-	"SangXanh/pkg/connection"
 	"SangXanh/pkg/enum"
 	"SangXanh/pkg/log"
 	"fmt"
@@ -16,14 +14,12 @@ import (
 
 // This small command connects to Supabase, fetches all
 // non-deleted products and logs them to the console.
-func main() {
+func SyncData(di do.Injector) {
 	// Initialize dependency injection and shared components
-	di := do.New()
-	config.Inject(di)
-	connection.Inject(di)
 
 	// Get MeiliSearch configuration from environment variables
 	meilisearchURL := os.Getenv("MEILISEARCH_URL")
+	log.Info("MeiliSearch URL: ", meilisearchURL)
 	if meilisearchURL == "" {
 		meilisearchURL = "http://127.0.0.1:7700" // fallback for local dev
 	}
@@ -71,43 +67,42 @@ func main() {
 	var meiliDocs []map[string]interface{}
 	for _, p := range products {
 		doc := map[string]interface{}{
-			"id":            p.Id,
-			"name":          p.Name,
-			"price":         p.Price,
-			"content":       p.Content,
-			"description":   p.Description,
-			"categoryId":    p.CategoryId,
-			"thumbnail":     p.Thumbnail,
-			"image_detail":  p.ImageDetail,
-			"discount":      p.Discount,
-			"discount_type": p.DiscountType,
-			"product_code":  p.ProductCode,
-			"metadata":      p.Metadata,
-			"questions":     p.Questions,
+			"id":    p.Id,
+			"name":  p.Name,
+			"price": p.Price,
+			// "content":       p.Content,
+			// "description":   p.Description,
+			// "category_id":   p.CategoryId,
+			// "thumbnail":     p.Thumbnail,
+			// "image_detail":  p.ImageDetail,
+			// "discount":      p.Discount,
+			// "discount_type": p.DiscountType,
+			// "product_code":  p.ProductCode,
+			// "metadata":      p.Metadata,
+			// "questions":     p.Questions,
 		}
 		meiliDocs = append(meiliDocs, doc)
 	}
-
 	id := "id"
 	task, err := meilisearchClient.Index("products").AddDocuments(meiliDocs, &meilisearch.DocumentOptions{
 		PrimaryKey: &id,
 	})
 
-	updateIndexTask, err := meilisearchClient.Index("products").UpdateFilterableAttributes(&[]interface{}{
-		"categoryId",
-		"discount",
-		"price",
-		"discount_type",
-		"product_code",
-	})
+	// updateIndexTask, err := meilisearchClient.Index("products").UpdateFilterableAttributes(&[]interface{}{
+	// 	"category_id",
+	// 	"discount",
+	// 	"price",
+	// 	"discount_type",
+	// 	"product_code",
+	// })
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Init task, ", task.Status)
-	fmt.Println("Update filterable attributes task, ", updateIndexTask.Status)
+	fmt.Println("Init task, ", task.TaskUID)
+	// fmt.Println("Update filterable attributes task, ", updateIndexTask.TaskUID)
 
 	log.Info("Sync completed successfully")
 }

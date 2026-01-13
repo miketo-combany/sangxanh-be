@@ -73,6 +73,12 @@ docker-shell-dev:
 
 init: 
 	go run cmd/sync/main.go
+
+re-run:
+	docker compose down -v
+	docker system prune -f
+	docker compose up -d
+
 	
 
 # Help

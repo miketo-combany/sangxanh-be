@@ -39,6 +39,7 @@ func main() {
 	if err := controller.RegisterAPI(di, api, authMiddleware, enableSwagger); err != nil {
 		panic(err)
 	}
+	connection.SyncData(di)
 
 	log.Fatal(e.Start(serverConf.Address()))
 }
