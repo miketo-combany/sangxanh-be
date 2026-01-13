@@ -8,7 +8,10 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"SangXanh/pkg/log"
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/nedpals/supabase-go"
@@ -27,7 +30,8 @@ type ids struct {
 	Id string `json:"id"`
 }
 type productService struct {
-	db *supabase.Client
+	db              *supabase.Client
+	categoryService CategoryService
 }
 
 func NewProductService(di do.Injector) (ProductService, error) {
@@ -36,7 +40,15 @@ func NewProductService(di do.Injector) (ProductService, error) {
 		return nil, fmt.Errorf("failed to initialize UserService: %w", err)
 	}
 
-	return &productService{db: db}, nil
+	categoryService, err := do.Invoke[CategoryService](di)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize CategoryService: %w", err)
+	}
+
+	return &productService{
+		db:              db,
+		categoryService: categoryService,
+	}, nil
 }
 
 func (s *productService) countProducts(ctx context.Context, filter dto.ProductFilter) (int, error) {
@@ -109,7 +121,25 @@ func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFil
 
 	// Apply category filter if provided
 	if filter.CategoryId != "" {
-		filters = append(filters, fmt.Sprintf("category_id = \"%s\"", filter.CategoryId))
+		// Get descendants
+		descendants, err := s.categoryService.GetCategoryDescendants(ctx, filter.CategoryId)
+		if err != nil {
+			log.Errorf("failed to get category descendants: %v", err)
+			// Fallback to just the current category if error
+			filters = append(filters, fmt.Sprintf("category_id = \"%s\"", filter.CategoryId))
+		} else {
+			// Include the requested category itself
+			descendants = append(descendants, filter.CategoryId)
+
+			// Build OR filter for all related categories
+			if len(descendants) > 0 {
+				var catFilters []string
+				for _, id := range descendants {
+					catFilters = append(catFilters, fmt.Sprintf("category_id = \"%s\"", id))
+				}
+				filters = append(filters, fmt.Sprintf("(%s)", strings.Join(catFilters, " OR ")))
+			}
+		}
 	}
 
 	if filter.SmallerThan > 0 {
