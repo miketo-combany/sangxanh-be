@@ -21,7 +21,7 @@ docker-build:
 	docker compose build
 
 docker-up:
-	docker compose up -d
+	docker compose up -d && sleep 5 && curl http://localhost:8080/init-meilisearch
 
 docker-down:
 	docker compose down
@@ -73,6 +73,12 @@ docker-shell-dev:
 
 init: 
 	go run cmd/sync/main.go
+
+re-run:
+	docker compose down -v
+	docker system prune -f
+	docker compose up -d
+
 	
 
 # Help

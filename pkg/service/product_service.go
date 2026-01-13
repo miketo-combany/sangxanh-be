@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -75,7 +76,17 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
 	total, err := s.countProducts(ctx, filter)
-	meilisearchClient := meilisearch.New("http://127.0.0.1:7700", meilisearch.WithAPIKey("masterKey"))
+
+	// Get MeiliSearch configuration from environment variables
+	meilisearchURL := os.Getenv("MEILISEARCH_URL")
+	if meilisearchURL == "" {
+		meilisearchURL = "http://127.0.0.1:7700" // fallback for local dev
+	}
+	meilisearchKey := os.Getenv("MEILISEARCH_API_KEY")
+	if meilisearchKey == "" {
+		meilisearchKey = "masterKey"
+	}
+	meilisearchClient := meilisearch.New(meilisearchURL, meilisearch.WithAPIKey(meilisearchKey))
 
 	// Build MeiliSearch request
 	query := filter.Name
