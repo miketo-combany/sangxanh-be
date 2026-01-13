@@ -2,7 +2,7 @@
 
 # Local development
 run:
-	GOOS=linux GOARCH=amd64 go run cmd/api/main.go
+	go run cmd/api/main.go
 
 dev:
 	air -c .air.toml
@@ -70,6 +70,10 @@ docker-shell:
 
 docker-shell-dev:
 	docker compose exec app-dev sh
+
+init: 
+	go run cmd/sync/main.go
+	
 
 # Help
 help:

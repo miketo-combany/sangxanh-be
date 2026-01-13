@@ -5,11 +5,13 @@ import (
 	"SangXanh/pkg/dto"
 	"context"
 	"fmt"
-	"github.com/nedpals/supabase-go"
-	"github.com/samber/do/v2"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/meilisearch/meilisearch-go"
+	"github.com/nedpals/supabase-go"
+	"github.com/samber/do/v2"
 )
 
 type ProductService interface {
@@ -73,56 +75,55 @@ func (s *productService) countProducts(ctx context.Context, filter dto.ProductFi
 
 func (s *productService) ListProducts(ctx context.Context, filter dto.ProductFilter) (api.Response, error) {
 	total, err := s.countProducts(ctx, filter)
-	if err != nil {
-		return nil, err
+	meilisearchClient := meilisearch.New("http://127.0.0.1:7700", meilisearch.WithAPIKey("masterKey"))
+
+	// Build MeiliSearch request
+	query := filter.Name
+	limit := filter.Pagination.Limit
+	offset := (filter.Pagination.Page - 1) * filter.Pagination.Limit
+	if limit <= 0 {
+		limit = 20 // default limit
+	}
+	if offset < 0 {
+		offset = 0
 	}
 
-	// 2. fetch the current page
-	var products []dto.ProductList
-	query := s.db.DB.From("products").
-		Select("id,name,price,content,image_detail,category_id,thumbnail,questions,product_code,discount,discount_type,categories!inner(id,name),created_at,updated_at").
-		LimitWithOffset(int(filter.Limit), int((filter.Page-1)*filter.Limit)).
-		IsNull("deleted_at")
-
-	if filter.Name != "" {
-		encoded := url.QueryEscape("%" + filter.Name + "%")
-		query = query.Like("name", encoded)
+	searchRequest := &meilisearch.SearchRequest{
+		Limit:  limit,
+		Offset: offset,
 	}
 
-	if filter.ProductCode != "" {
-		query = query.Eq("product_code", filter.ProductCode)
-	}
+	// Build filters
+	var filters []string
 
+	// Apply category filter if provided
 	if filter.CategoryId != "" {
-		var categoryIds []ids
-		err = s.db.DB.From("categories").Select("id").Eq("parent_id", filter.CategoryId).Execute(&categoryIds)
-		if err != nil {
-			return nil, err
-		}
-		var cateIds []string
-		for _, id := range categoryIds {
-			cateIds = append(cateIds, id.Id)
-		}
-		cateIds = append(cateIds, filter.CategoryId)
-		query = query.In("category_id", cateIds)
+		filters = append(filters, fmt.Sprintf("category_id = \"%s\"", filter.CategoryId))
 	}
-	if filter.IsDiscount {
-		query = query.Not().IsNull("discount")
-	}
-	if filter.GreaterThan > 0 {
-		query = query.Gt("price", strconv.FormatFloat(filter.GreaterThan, 'f', -1, 32))
-	}
+
 	if filter.SmallerThan > 0 {
-		query = query.Lt("price", strconv.FormatFloat(filter.SmallerThan, 'f', -1, 32))
+		filters = append(filters, fmt.Sprintf("price < %f", filter.SmallerThan))
 	}
 
-	if err := query.Execute(&products); err != nil {
-		return nil, fmt.Errorf("failed to fetch products: %w", err)
+	if filter.GreaterThan > 0 {
+		filters = append(filters, fmt.Sprintf("price > %f", filter.GreaterThan))
 	}
 
-	// 3. fill in pagination meta & return
+	// Combine all filters with AND
+	if len(filters) > 0 {
+		searchRequest.Filter = filters[0]
+		for i := 1; i < len(filters); i++ {
+			searchRequest.Filter = fmt.Sprintf("%s AND %s", searchRequest.Filter, filters[i])
+		}
+	}
+
+	searchRes, err := meilisearchClient.Index("products").Search(query, searchRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search products: %w", err)
+	}
+
 	filter.Pagination.Total = int64(total)
-	return api.SuccessPagination(products, &filter.Pagination), nil
+	return api.SuccessPagination(searchRes.Hits, &filter.Pagination), nil
 }
 
 func (s *productService) CreateProduct(ctx context.Context, req dto.ProductCreated) (api.Response, error) {

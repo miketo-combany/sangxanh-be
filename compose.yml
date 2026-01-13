@@ -26,6 +26,16 @@ services:
       - "com.sangxanh.description=SangXanh Backend API"
       - "com.sangxanh.version=1.0"
 
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    volumes:
+      - meili_data:/meili_data
+    ports:
+      - "7700:7700"
+    networks:
+      - app-network
+
   # Development service with hot reload
   app-dev:
     build:
@@ -59,3 +69,5 @@ networks:
 volumes:
   go-modules:
     name: sangxanh-go-modules
+  meili_data:
+    name: sangxanh-meili-data
