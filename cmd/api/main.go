@@ -39,7 +39,12 @@ func main() {
 	if err := controller.RegisterAPI(di, api, authMiddleware, enableSwagger); err != nil {
 		panic(err)
 	}
-	connection.SyncData(di)
+	e.GET("/health", func(c echo.Context) error {
+		connection.SyncData(di)
+	return c.JSON(200, map[string]string{
+		"status": "ok",
+	})
+})
 
 	log.Fatal(e.Start(serverConf.Address()))
 }
