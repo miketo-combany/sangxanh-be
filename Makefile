@@ -21,7 +21,7 @@ docker-build:
 	docker compose build
 
 docker-up:
-	docker compose up -d && sleep 5 && curl http://localhost:8080/api/health
+	docker compose up -d && sleep 5 && curl http://localhost:8080/init-meilisearch
 
 docker-down:
 	docker compose down
