@@ -91,6 +91,7 @@ func (s *shopService) GetShop(ctx context.Context) (api.Response, error) {
 			CreatedAt: parseTimeString(shop.CreatedAt),
 			Name:      shop.Name,
 			Hotline:   shop.Hotline,
+			Zalo:      shop.Zalo,
 			Branches:  branches,
 			Policies:  policies,
 			Contact:   contact,
@@ -120,6 +121,7 @@ func (s *shopService) UpdateShop(ctx context.Context, req dto.ShopUpdate) (api.R
 	updateData := map[string]interface{}{
 		"name":     req.Name,
 		"hotline":  req.Hotline,
+		"zalo":     req.Zalo,
 		"branches": req.Branches,
 		"policies": req.Policies,
 		"contact":  req.Contact,
@@ -169,6 +171,7 @@ func (s *shopService) UpdateShop(ctx context.Context, req dto.ShopUpdate) (api.R
 			CreatedAt: parseTimeString(updatedShop.CreatedAt),
 			Name:      updatedShop.Name,
 			Hotline:   updatedShop.Hotline,
+			Zalo:      updatedShop.Zalo,
 			Branches:  branches,
 			Policies:  policies,
 			Contact:   contact,
