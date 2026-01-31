@@ -23,6 +23,7 @@ func RegisterAPI(di do.Injector, e *echo.Group, auth echo.MiddlewareFunc, enable
 		NewOrderController,
 		NewVideoController,
 		NewShopController,
+		NewBannerController,
 	}
 
 	for _, c := range controllers {
