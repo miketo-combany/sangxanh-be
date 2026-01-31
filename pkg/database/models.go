@@ -406,6 +406,7 @@ type PublicShopSelect struct {
 	CreatedAt string      `json:"created_at"`
 	Name      string      `json:"name"`
 	Hotline   string      `json:"hotline"`
+	Zalo      string      `json:"zalo"`
 	Branches  interface{} `json:"branches"`
 	Policies  interface{} `json:"policies"`
 	Contact   interface{} `json:"contact"`
@@ -414,6 +415,7 @@ type PublicShopSelect struct {
 type PublicShopUpdate struct {
 	Name     sql.NullString `json:"name"`
 	Hotline  sql.NullString `json:"hotline"`
+	Zalo     sql.NullString `json:"zalo"`
 	Branches interface{}    `json:"branches"`
 	Policies interface{}    `json:"policies"`
 	Contact  interface{}    `json:"contact"`

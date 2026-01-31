@@ -28,6 +28,7 @@ type Shop struct {
 	CreatedAt time.Time `json:"created_at"`
 	Name      string    `json:"name"`
 	Hotline   string    `json:"hotline"`
+	Zalo      string    `json:"zalo"`
 	Branches  []Branch  `json:"branches"`
 	Policies  []Policy  `json:"policies"`
 	Contact   []Contact `json:"contact"`
@@ -37,6 +38,7 @@ type Shop struct {
 type ShopUpdate struct {
 	Name     string    `json:"name" validate:"required"`
 	Hotline  string    `json:"hotline" validate:"required"`
+	Zalo     string    `json:"zalo"`
 	Branches []Branch  `json:"branches" validate:"required,dive"`
 	Policies []Policy  `json:"policies" validate:"required,dive"`
 	Contact  []Contact `json:"contact" validate:"required,dive"`
